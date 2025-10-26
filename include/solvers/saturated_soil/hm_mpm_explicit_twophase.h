@@ -11,7 +11,7 @@ namespace mpm {
 
 //! MPMExplicit class
 //! \brief A class that implements the fully explicit one phase mpm
-//! \details A single-phase explicit MPM
+//! \details A two-phase explicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class HMMPMExplicitTwoPhase : public MPMBase<Tdim> {

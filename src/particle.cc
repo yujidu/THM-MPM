@@ -3,9 +3,9 @@
 #include "particle_base.h"
 #include "twophase_particle.h"
 #include "threephase_particle.h"
-#include "Frozen_particle.h"
-#include "Frozen_particle_unsaturated.h"
-#include "MHBS_particle.h"
+#include "frozen_particle.h"
+#include "frozen_particle_unsaturated.h"
+#include "hydrate_particle.h"
 
 // Single phase particle2D (2 Dim)
 static Register<mpm::ParticleBase<2>, mpm::Particle<2>, mpm::Index,
@@ -40,29 +40,29 @@ static Register<mpm::ParticleBase<3>, mpm::ThreePhaseParticle<3>, mpm::Index,
 // Two phase particle2D with phase change (2 Dim)
 static Register<mpm::ParticleBase<2>, mpm::FrozenParticle<2>, mpm::Index,
                 const Eigen::Matrix<double, 2, 1>&>
-    particle2d2phasePC("P2D2PHASE&PC");
+    particle2dsatfrozen("P2DFROZENSAT");
 
 // Two phase particle3D with phase change (3 Dim)
 static Register<mpm::ParticleBase<3>, mpm::FrozenParticle<3>, mpm::Index,
                 const Eigen::Matrix<double, 3, 1>&>
-    particle3d2phasePC("P3D2PHASE&PC");
+    particle3dsatfrozen("P3DFROZENSAT");
 
 // Three phase particle2D with phase change (2 Dim)
 static Register<mpm::ParticleBase<2>, mpm::UnsatFrozenParticle<2>, mpm::Index,
                 const Eigen::Matrix<double, 2, 1>&>
-    particle2d3phasePC("P2D3PHASE&PC");
+    particle2dunsatfrozen("P2DFROZENUNSAT");
 
 // Three phase particle3D with phase change (3 Dim)
 static Register<mpm::ParticleBase<3>, mpm::UnsatFrozenParticle<3>, mpm::Index,
                 const Eigen::Matrix<double, 3, 1>&>
-    particle3d3phasePC("P3D3PHASE&PC");
+    particle3dunsatfrozen("P3DFROZENUNSAT");
 
 // Two phase particle2D with phase change (2 Dim)
-static Register<mpm::ParticleBase<2>, mpm::MHBSParticle<2>, mpm::Index,
+static Register<mpm::ParticleBase<2>, mpm::HydrateParticle<2>, mpm::Index,
                 const Eigen::Matrix<double, 2, 1>&>
-    MHBSparticle2d("P2DMHBS");
+    particle2dhydrate("P2DHYDRATE");
 
 // Two phase particle3D with phase change (3 Dim)
-static Register<mpm::ParticleBase<3>, mpm::MHBSParticle<3>, mpm::Index,
+static Register<mpm::ParticleBase<3>, mpm::HydrateParticle<3>, mpm::Index,
                 const Eigen::Matrix<double, 3, 1>&>
-    MHBSparticle3d("P3DMHBS");
+    particle3dhydrate("P3DHYDRATE");

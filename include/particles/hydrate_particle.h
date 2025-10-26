@@ -1,5 +1,5 @@
-#ifndef MPM_MHBS_PARTICLE_WITH_PHASE_CHANGE_H_
-#define MPM_MHBS_PARTICLE_WITH_PHASE_CHANGE_H_
+#ifndef MPM_HYDRATE_PARTICLE_H_
+#define MPM_HYDRATE_PARTICLE_H_
 
 #include <array>
 #include <limits>
@@ -15,9 +15,9 @@
 
 namespace mpm {
 
-// MHBSParticle class
+// HydrateParticle class
 template <unsigned Tdim>
-class MHBSParticle : public mpm::Particle<Tdim> {
+class HydrateParticle : public mpm::Particle<Tdim> {
 
 public:
   // Define a vector of size dimension
@@ -27,16 +27,16 @@ public:
   // CONSTRUCT AND DESTRUCT A PARTICLE
 
   // Construct a particle with id and coordinates
-  MHBSParticle(Index id, const VectorDim& coord);
+  HydrateParticle(Index id, const VectorDim& coord);
 
   // Destructor
-  ~MHBSParticle() override{};
+  ~HydrateParticle() override{};
 
   // Delete copy constructor
-  MHBSParticle(const MHBSParticle<Tdim>&) = delete;
+  HydrateParticle(const HydrateParticle<Tdim>&) = delete;
 
   // Delete assignment operator
-  MHBSParticle& operator = (const MHBSParticle<Tdim>&) = delete;
+  HydrateParticle& operator = (const HydrateParticle<Tdim>&) = delete;
 
   //============================================================================
   // ASSIGN INITIAL CONDITIONS
@@ -390,9 +390,9 @@ protected:
 
   Eigen::Matrix<double, 6, 1> K_matrix_;
 
-};  // MHBSParticle class
+};  // HydrateParticle class
 }  // namespace mpm
 
-#include "MHBS_particle.tcc"
+#include "hydrate_particle.tcc"
 
-#endif  // MPM_MHBS_PARTICLE_WITH_PHASE_CHANGE_H__
+#endif 

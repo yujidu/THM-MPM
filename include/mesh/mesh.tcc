@@ -2071,7 +2071,7 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
 
       // Assign liquid material
       if ((particle_type == "P2D2PHASE" || particle_type == "P3D2PHASE") ||
-          (particle_type == "P2D2PHASE&PC" || particle_type == "P3D2PHASE&PC") ||
+          (particle_type == "P2D2FROZEN" || particle_type == "P3D2FROZEN") ||
           (particle_type == "P2D3PHASE&PC" || particle_type == "P3D3PHASE&PC") ||
           (particle_type == "P2DMHBS" || particle_type == "P3DMHBS")) {
         // Liquid material id
@@ -2125,7 +2125,7 @@ bool mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
   // Create particles from coordinates
   if ((particle_type == "P2D2PHASE" || particle_type == "P3D2PHASE") ||
       (particle_type == "P2D3PHASE" || particle_type == "P3D3PHASE") ||
-      (particle_type == "P2D2PHASE&PC" || particle_type == "P3D2PHASE&PC") ||
+      (particle_type == "P2D2FROZEN" || particle_type == "P3D2FROZEN") ||
       (particle_type == "P2D3PHASE&PC" || particle_type == "P3D3PHASE&PC") ||
       (particle_type == "P2DMHBS" || particle_type == "P3DMHBS")) {
     // Liquid material id

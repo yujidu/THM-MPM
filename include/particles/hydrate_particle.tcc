@@ -1,6 +1,6 @@
 // Construct a two phase particle with id and coordinates
 template <unsigned Tdim>
-mpm::MHBSParticle<Tdim>::MHBSParticle(Index id, const VectorDim& coord)
+mpm::HydrateParticle<Tdim>::HydrateParticle(Index id, const VectorDim& coord)
     : mpm::Particle<Tdim>(id, coord) {
 
     this->initialise_liquid_phase();
@@ -8,7 +8,7 @@ mpm::MHBSParticle<Tdim>::MHBSParticle(Index id, const VectorDim& coord)
     // Set material pointer to null
     liquid_material_ = nullptr;
     // Logger
-    std::string logger = "MHBSParticle" + std::to_string(Tdim) + "d::" + std::to_string(id);
+    std::string logger = "HydrateParticle" + std::to_string(Tdim) + "d::" + std::to_string(id);
     console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
@@ -18,7 +18,7 @@ mpm::MHBSParticle<Tdim>::MHBSParticle(Index id, const VectorDim& coord)
 
 // Initialise particle data from HDF5
 template <unsigned Tdim>
-bool mpm::MHBSParticle<Tdim>::initialise_particle(
+bool mpm::HydrateParticle<Tdim>::initialise_particle(
     const HDF5Particle& particle) {
     // Derive from particle
     mpm::Particle<Tdim>::initialise_particle(particle);
@@ -67,7 +67,7 @@ bool mpm::MHBSParticle<Tdim>::initialise_particle(
 
 // Initialise particle HDF5 data and material
 template <unsigned Tdim>
-bool mpm::MHBSParticle<Tdim>::initialise_particle(
+bool mpm::HydrateParticle<Tdim>::initialise_particle(
     const HDF5Particle& particle,
     const std::shared_ptr<mpm::Material<Tdim>>& material) {
     bool status = this->initialise_particle(particle);
@@ -94,7 +94,7 @@ bool mpm::MHBSParticle<Tdim>::initialise_particle(
 
 // Initialise liquid phase particle properties
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::initialise_liquid_phase() {
+void mpm::HydrateParticle<Tdim>::initialise_liquid_phase() {
     // MIXTURE
     set_mixture_traction_ = false;
     pore_pressure_ = 0.;
@@ -221,7 +221,7 @@ void mpm::MHBSParticle<Tdim>::initialise_liquid_phase() {
 
 // Return particle data in HDF5 format
 template <unsigned Tdim>
-mpm::HDF5Particle mpm::MHBSParticle<Tdim>::hdf5() {
+mpm::HDF5Particle mpm::HydrateParticle<Tdim>::hdf5() {
     // Derive from particle
     auto particle_data = mpm::Particle<Tdim>::hdf5();
 
@@ -266,7 +266,7 @@ mpm::HDF5Particle mpm::MHBSParticle<Tdim>::hdf5() {
 
 // Assign a liquid material to particle
 template <unsigned Tdim>
-bool mpm::MHBSParticle<Tdim>::assign_liquid_material(
+bool mpm::HydrateParticle<Tdim>::assign_liquid_material(
                       const std::shared_ptr<Material<Tdim>>& material) {
     bool status = false;
     try {
@@ -287,14 +287,14 @@ bool mpm::MHBSParticle<Tdim>::assign_liquid_material(
 
 // Compute mass of particle (both solid and fluid)
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::compute_mass() {
+void mpm::HydrateParticle<Tdim>::compute_mass() {
   mpm::Particle<Tdim>::compute_mass();
   this->assign_initial_properties();
 }
 
 // Assign initial properties to particle
 template <unsigned Tdim>
-bool mpm::MHBSParticle<Tdim>::assign_initial_properties() {
+bool mpm::HydrateParticle<Tdim>::assign_initial_properties() {
   bool status = true;
   try {
     this->ini_porosity_ = material_->template property<double>(std::string("porosity"));
@@ -465,7 +465,7 @@ bool mpm::MHBSParticle<Tdim>::assign_initial_properties() {
 
 // Map particle mass and momentum to nodes
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_mass_momentum_to_nodes() noexcept {
+void mpm::HydrateParticle<Tdim>::map_mass_momentum_to_nodes() noexcept {
   if (this->material_id_ != 999) {
     // SOLID PHASE
     mpm::Particle<Tdim>::map_mass_momentum_to_nodes();
@@ -495,7 +495,7 @@ void mpm::MHBSParticle<Tdim>::map_mass_momentum_to_nodes() noexcept {
 
 // Map particle external force = body force + traction force 
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_external_force(const VectorDim& pgravity) {
+void mpm::HydrateParticle<Tdim>::map_external_force(const VectorDim& pgravity) {
   if (this->material_id_ != 999) {
     try {
       this->pgravity_ = pgravity;
@@ -532,7 +532,7 @@ void mpm::MHBSParticle<Tdim>::map_external_force(const VectorDim& pgravity) {
 
 // Map particle internal force 2D
 template <>
-void mpm::MHBSParticle<2>::map_internal_force() {
+void mpm::HydrateParticle<2>::map_internal_force() {
   if (this->material_id_ != 999) {
     try {
       Eigen::Matrix<double, 2, 1> mixture_force, liquid_force, gas_force;
@@ -603,7 +603,7 @@ void mpm::MHBSParticle<2>::map_internal_force() {
 
 // Map particle internal force 3D
 template <>
-void mpm::MHBSParticle<3>::map_internal_force() {
+void mpm::HydrateParticle<3>::map_internal_force() {
   if (this->material_id_ != 999) {
     try {
       Eigen::Matrix<double, 3, 1> mixture_force, liquid_force, gas_force;
@@ -657,7 +657,7 @@ void mpm::MHBSParticle<3>::map_internal_force() {
 
 // Map drag force coefficient - lumped matrix
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_drag_force_coefficient() {
+void mpm::HydrateParticle<Tdim>::map_drag_force_coefficient() {
   if (this->material_id_ != 999) {  
     try {
       for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -685,7 +685,7 @@ void mpm::MHBSParticle<Tdim>::map_drag_force_coefficient() {
 
 // Map particle heat to nodes
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_heat_to_nodes() {
+void mpm::HydrateParticle<Tdim>::map_heat_to_nodes() {
   if (this->material_id_ != 999) {
     try {
       // Calculate mixture heat capacity  
@@ -711,7 +711,7 @@ void mpm::MHBSParticle<Tdim>::map_heat_to_nodes() {
 
 // Map conductive heat transfer
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_heat_conduction() {
+void mpm::HydrateParticle<Tdim>::map_heat_conduction() {
   if (this->material_id_ != 999) {
     try {
       // Calculate temperature gradient
@@ -742,7 +742,7 @@ void mpm::MHBSParticle<Tdim>::map_heat_conduction() {
 
 // Map convective heat transfer
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_heat_convection() {
+void mpm::HydrateParticle<Tdim>::map_heat_convection() {
   if (this->material_id_ != 999) {
     try {
       // Liquid phase & Gas phase
@@ -771,7 +771,7 @@ void mpm::MHBSParticle<Tdim>::map_heat_convection() {
 
 // Map convective heat transfer
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_mass_convection() {
+void mpm::HydrateParticle<Tdim>::map_mass_convection() {
   try {
     // Liquid phase & Gas phase
     this->gas_density_gradient_ = 
@@ -809,7 +809,7 @@ void mpm::MHBSParticle<Tdim>::map_mass_convection() {
 
 // Compute density gradient of the particle
 template <unsigned Tdim>
-inline Eigen::Matrix<double, Tdim, 1> mpm::MHBSParticle<Tdim>::
+inline Eigen::Matrix<double, Tdim, 1> mpm::HydrateParticle<Tdim>::
                       compute_density_gradient(unsigned phase) noexcept {
 
   Eigen::Matrix<double, Tdim, 1> density_gradient;
@@ -828,7 +828,7 @@ inline Eigen::Matrix<double, Tdim, 1> mpm::MHBSParticle<Tdim>::
 
 // Map particle pore liquid pressure to nodes
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_density_to_nodes() {
+void mpm::HydrateParticle<Tdim>::map_density_to_nodes() {
   // Check if particle mass is set
   assert(liquid_mass_ != std::numeric_limits<double>::max());
   if (this->material_id_ != 999){
@@ -844,7 +844,7 @@ void mpm::MHBSParticle<Tdim>::map_density_to_nodes() {
 
 // Map source term due to phase transition - lumped matrix
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_heat_source() {
+void mpm::HydrateParticle<Tdim>::map_heat_source() {
   if (this->material_id_ != 999) {  
     try {
       double liquid_coeff = liquid_density_ / liquid_compressibility_;
@@ -880,7 +880,7 @@ void mpm::MHBSParticle<Tdim>::map_heat_source() {
 
 // Map hydraulic conduction
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_hydraulic_conduction() {
+void mpm::HydrateParticle<Tdim>::map_hydraulic_conduction() {
   if (this->material_id_ != 999) {
     double liquid_coeff = liquid_density_ / liquid_compressibility_;
     double gas_coeff = gas_density_ * gas_density_ * gas_constant_ * 
@@ -952,7 +952,7 @@ void mpm::MHBSParticle<Tdim>::map_hydraulic_conduction() {
 
 // Map volumetric strain
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_volumetric_strain() {
+void mpm::HydrateParticle<Tdim>::map_volumetric_strain() {
   double liquid_coeff = liquid_density_ / liquid_compressibility_;
   double gas_coeff = gas_density_ * gas_density_ * gas_constant_ * 
                               (PIC_temperature_ + 273.15) / gas_molar_mass_;
@@ -972,7 +972,7 @@ void mpm::MHBSParticle<Tdim>::map_volumetric_strain() {
 
 // Compute pressure gradient of the particle
 template <unsigned Tdim>
-inline Eigen::Matrix<double, Tdim, 1> mpm::MHBSParticle<Tdim>::
+inline Eigen::Matrix<double, Tdim, 1> mpm::HydrateParticle<Tdim>::
                       compute_pressure_gradient(unsigned phase) noexcept {
   Eigen::Matrix<double, Tdim, 1> pressure_gradient;
   pressure_gradient.setZero();
@@ -994,7 +994,7 @@ inline Eigen::Matrix<double, Tdim, 1> mpm::MHBSParticle<Tdim>::
 
 // Compute updated pore_pressure of the particle
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::update_particle_pore_pressure(
+void mpm::HydrateParticle<Tdim>::update_particle_pore_pressure(
     double dt, double pic_t) noexcept {
   if (this->material_id_ != 999) {
     // Check if particle has a valid cell ptr and pic_t value
@@ -1057,7 +1057,7 @@ void mpm::MHBSParticle<Tdim>::update_particle_pore_pressure(
 
 // Compute updated velocity of the liquid
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::compute_updated_velocity(
+void mpm::HydrateParticle<Tdim>::compute_updated_velocity(
                       double dt, double pic, double damping_factor) {
   mpm::Particle<Tdim>::compute_updated_velocity(dt, pic, damping_factor);
 
@@ -1119,7 +1119,7 @@ void mpm::MHBSParticle<Tdim>::compute_updated_velocity(
 
 // Compute updated hydrate saturation
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::compute_pore_pressure(double dt){
+void mpm::HydrateParticle<Tdim>::compute_pore_pressure(double dt){
   if (this->material_id_ != 999) {
     try {
       const double K_0 = material_->template property<double>(std::string("K_0"));
@@ -1275,7 +1275,7 @@ void mpm::MHBSParticle<Tdim>::compute_pore_pressure(double dt){
 
 // Assign a liquid material to particle
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::update_particle_volume() {
+void mpm::HydrateParticle<Tdim>::update_particle_volume() {
   if (this->material_id_ != 999) {
     try {
       // Solid phase  
@@ -1319,7 +1319,7 @@ void mpm::MHBSParticle<Tdim>::update_particle_volume() {
 
 // Calculate absoulute/relative permeability
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::update_permeability() {
+void mpm::HydrateParticle<Tdim>::update_permeability() {
   if (this->material_id_ != 999) {
     try {   
       double k_phi = 1;
@@ -1374,7 +1374,7 @@ void mpm::MHBSParticle<Tdim>::update_permeability() {
 
 // Calculate source term in balance equations
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::update_source_term() {
+void mpm::HydrateParticle<Tdim>::update_source_term() {
   if (this->material_id_ != 999) {
     try {
       // Calculate hydrate stability pressure pe:
@@ -1434,7 +1434,7 @@ void mpm::MHBSParticle<Tdim>::update_source_term() {
 
 // Compute updated hydrate saturation
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::update_hydrate_saturation(double dt){
+void mpm::HydrateParticle<Tdim>::update_hydrate_saturation(double dt){
   if (this->material_id_ != 999) {
     try {
       // // Forward euler
@@ -1459,7 +1459,7 @@ void mpm::MHBSParticle<Tdim>::update_hydrate_saturation(double dt){
 
 // Compute updated liquid saturation
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::update_liquid_saturation(double dt){
+void mpm::HydrateParticle<Tdim>::update_liquid_saturation(double dt){
   if (this->material_id_ != 999) {
     try {
       this->suction_pressure_ = PIC_gas_pressure_ - PIC_liquid_pressure_;
@@ -1500,7 +1500,7 @@ void mpm::MHBSParticle<Tdim>::update_liquid_saturation(double dt){
 
 // Compute updated density
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::update_particle_density(double dt){
+void mpm::HydrateParticle<Tdim>::update_particle_density(double dt){
   if (this->material_id_ != 999) {  
     try {
       double p_ref = material_->template property<double>(std::string("p_ref"));
@@ -1528,7 +1528,7 @@ void mpm::MHBSParticle<Tdim>::update_particle_density(double dt){
 
 // Assign traction
 template <unsigned Tdim>
-bool mpm::MHBSParticle<Tdim>::assign_particle_traction(unsigned direction,
+bool mpm::HydrateParticle<Tdim>::assign_particle_traction(unsigned direction,
                                                           double traction) {
   bool status = false;
   if (this->material_id_ != 999) {
@@ -1561,7 +1561,7 @@ bool mpm::MHBSParticle<Tdim>::assign_particle_traction(unsigned direction,
 
 // Assign particle liquid phase velocity constraint
 template <unsigned Tdim>
-bool mpm::MHBSParticle<Tdim>::assign_particle_liquid_velocity_constraint(
+bool mpm::HydrateParticle<Tdim>::assign_particle_liquid_velocity_constraint(
       unsigned dir, double velocity) {
   bool status = true;
   try {
@@ -1583,7 +1583,7 @@ bool mpm::MHBSParticle<Tdim>::assign_particle_liquid_velocity_constraint(
 
 // Apply particle velocity constraints
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::apply_particle_liquid_velocity_constraints() {
+void mpm::HydrateParticle<Tdim>::apply_particle_liquid_velocity_constraints() {
   // Set particle velocity constraint
   for (const auto& constraint : this->liquid_velocity_constraints_) {
     // Direction value in the constraint (0, Dim)
@@ -1596,7 +1596,7 @@ void mpm::MHBSParticle<Tdim>::apply_particle_liquid_velocity_constraints() {
 
 // Assign particle pressure constraints
 template <unsigned Tdim>
-bool mpm::MHBSParticle<Tdim>::assign_particle_pore_pressure_constraint(
+bool mpm::HydrateParticle<Tdim>::assign_particle_pore_pressure_constraint(
       double pressure) {
   bool status = true;
   try {
@@ -1610,7 +1610,7 @@ bool mpm::MHBSParticle<Tdim>::assign_particle_pore_pressure_constraint(
 
 // Apply particle pore pressure constraints
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::apply_particle_pore_pressure_constraints(
+void mpm::HydrateParticle<Tdim>::apply_particle_pore_pressure_constraints(
       double pore_pressure) {
   // Set particle temperature constraint
   this->pore_pressure_ = pore_pressure;
@@ -1623,7 +1623,7 @@ void mpm::MHBSParticle<Tdim>::apply_particle_pore_pressure_constraints(
 
 // Overwrite node velocity to get strain correct
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_moving_rigid_velocity_to_nodes(
+void mpm::HydrateParticle<Tdim>::map_moving_rigid_velocity_to_nodes(
     unsigned dir, double velocity, double dt) noexcept {   
   if (this->material_id_ == 999){  
     for (unsigned i = 0; i < 4; ++i) {
@@ -1639,7 +1639,7 @@ void mpm::MHBSParticle<Tdim>::map_moving_rigid_velocity_to_nodes(
 
 // Map particle pore liquid pressure to nodes
 template <unsigned Tdim>
-bool mpm::MHBSParticle<Tdim>::map_pore_pressure_to_nodes(
+bool mpm::HydrateParticle<Tdim>::map_pore_pressure_to_nodes(
     double current_time) noexcept {
   if (this->material_id_ != 999) {
     // Check if particle mass is set
@@ -1661,7 +1661,7 @@ bool mpm::MHBSParticle<Tdim>::map_pore_pressure_to_nodes(
 
 // Map particle pore liquid pressure to nodes
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_mass_pressure_to_nodes() {
+void mpm::HydrateParticle<Tdim>::map_mass_pressure_to_nodes() {
   if (this->material_id_ != 999) {  
     // Check if particle mass is set
     assert(liquid_mass_ != std::numeric_limits<double>::max());
@@ -1679,7 +1679,7 @@ void mpm::MHBSParticle<Tdim>::map_mass_pressure_to_nodes() {
 
 // Compute pore liquid pressure smoothing based on nodal pressure
 template <unsigned Tdim>
-bool mpm::MHBSParticle<Tdim>::compute_pore_pressure_smoothing() noexcept {
+bool mpm::HydrateParticle<Tdim>::compute_pore_pressure_smoothing() noexcept {
   // Check if particle has a valid cell ptr
   assert(cell_ != nullptr);
   bool status = true;  
@@ -1711,7 +1711,7 @@ bool mpm::MHBSParticle<Tdim>::compute_pore_pressure_smoothing() noexcept {
 
 // Map particle pore liquid pressure to nodes
 template <unsigned Tdim>
-void mpm::MHBSParticle<Tdim>::map_scalers_to_nodes() {
+void mpm::HydrateParticle<Tdim>::map_scalers_to_nodes() {
   if (this->material_id_ != 999) {  
     // Check if particle mass is set
     assert(liquid_mass_ != std::numeric_limits<double>::max());
@@ -1752,7 +1752,7 @@ void mpm::MHBSParticle<Tdim>::map_scalers_to_nodes() {
 
 // Compute pore liquid pressure smoothing based on nodal pressure
 template <unsigned Tdim>
-bool mpm::MHBSParticle<Tdim>::compute_scalers_smoothing() noexcept {
+bool mpm::HydrateParticle<Tdim>::compute_scalers_smoothing() noexcept {
   // Check if particle has a valid cell ptr
   assert(cell_ != nullptr);
   bool status = true;  

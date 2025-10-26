@@ -361,6 +361,6 @@ private:
 };  // FrozenParticle class
 }  // namespace mpm
 
-#include "Frozen_particle.tcc"
+#include "frozen_particle.tcc"
 
-#endif  // MPM_FROZEN_PARTICLE_H__
+#endif

@@ -370,6 +370,6 @@ private:
 };  // UnsatFrozenParticle class
 }  // namespace mpm
 
-#include "Frozen_particle_unsaturated.tcc"
+#include "frozen_particle_unsaturated.tcc"
 
-#endif  // MPM_TWOPHASE_PARTICLE_UNSATURATED_H__
+#endif

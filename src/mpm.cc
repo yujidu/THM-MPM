@@ -38,50 +38,56 @@ std::map<std::string, StressUpdate> stress_update = {
 }  // namespace mpm
 
 // 2D Explicit MPM
-static Register<mpm::MPM, mpm::MPMExplicit<2>, const std::shared_ptr<mpm::IO>&>
+static Register<mpm::MPM, mpm::MPMExplicit<2>, 
+                const std::shared_ptr<mpm::IO>&>
     mpm_explicit_2d("MPMExplicit2D");
 
 // 3D Explicit MPM
-static Register<mpm::MPM, mpm::MPMExplicit<3>, const std::shared_ptr<mpm::IO>&>
+static Register<mpm::MPM, mpm::MPMExplicit<3>, 
+                const std::shared_ptr<mpm::IO>&>
     mpm_explicit_3d("MPMExplicit3D");
 
-// 2D Implicit Thermo MPM
-static Register<mpm::MPM, mpm::ThermoMPMImplicit<2>, const std::shared_ptr<mpm::IO>&>
+// 2D Implicit Pure Thermal MPM
+static Register<mpm::MPM, mpm::ThermoMPMImplicit<2>, 
+                const std::shared_ptr<mpm::IO>&>
     thermo_mpm_implicit_2d("ThermoMPMImplicit2D");
 
-// 3D Implicit Thermo MPM
-static Register<mpm::MPM, mpm::ThermoMPMImplicit<3>, const std::shared_ptr<mpm::IO>&>
+// 3D Implicit Pure Thermal MPM
+static Register<mpm::MPM, mpm::ThermoMPMImplicit<3>, 
+                const std::shared_ptr<mpm::IO>&>
     thermo_mpm_implicit_3d("ThermoMPMImplicit3D");
 
-// 2D Explicit Thermo-mechnical MPM
-static Register<mpm::MPM, mpm::TMMPMExplicit<2>, const std::shared_ptr<mpm::IO>&>
+// 2D Explicit Thermo-Mechnical MPM
+static Register<mpm::MPM, mpm::TMMPMExplicit<2>, \
+                const std::shared_ptr<mpm::IO>&>
     tm_mpm_explicit_2d("TMMPMExplicit2D");
 
-// 3D Explicit Thermo-mechnical MPM
-static Register<mpm::MPM, mpm::TMMPMExplicit<3>, const std::shared_ptr<mpm::IO>&>
+// 3D Explicit Thermo-Mechnical MPM
+static Register<mpm::MPM, mpm::TMMPMExplicit<3>, 
+                const std::shared_ptr<mpm::IO>&>
     tm_mpm_explicit_3d("TMMPMExplicit3D");
 
-// 2D Explicit Two Phase MPM for hydromechanical modeling
+// 2D Explicit Two Phase MPM for Hydro-Mechanical Modeling
 static Register<mpm::MPM, mpm::HMMPMExplicitTwoPhase<2>,
                 const std::shared_ptr<mpm::IO>&>
     hm_mpm_explicit_twophase_2d("HMMPMExplicitTwoPhase2D");
 
-// 3D Explicit Two Phase MPM
+// 3D Explicit Two Phase MPM for Hydro-Mechanical Modeling
 static Register<mpm::MPM, mpm::HMMPMExplicitTwoPhase<3>,
                 const std::shared_ptr<mpm::IO>&>
     hm_mpm_explicit_twophase_3d("HMMPMExplicitTwoPhase3D");
 
-// 2D Explicit Two Phase Thermo-Hydro-mechnical MPM
+// 2D Explicit Two Phase Thermo-Hydro-Mechnical MPM
 static Register<mpm::MPM, mpm::THMMPMExplicitTwoPhase<2>,
                 const std::shared_ptr<mpm::IO>&>
     thm_mpm_explicit_twophase_2d("THMMPMExplicitTwoPhase2D");
 
-// 3D Explicit Two Phase Thermo-Hydro-mechnical MPM
+// 3D Explicit Two Phase Thermo-Hydro-Mechnical MPM
 static Register<mpm::MPM, mpm::THMMPMExplicitTwoPhase<3>,
                 const std::shared_ptr<mpm::IO>&>
     thm_mpm_explicit_twophase_3d("THMMPMExplicitTwoPhase3D");
 
-// 2D Explicit Three Phase Thermo-Hydro-mechnical MPM
+// 2D Explicit Three Phase Thermo-Hydro-Mechnical MPM
 static Register<mpm::MPM, mpm::THMMPMExplicitThreePhase<2>,
                 const std::shared_ptr<mpm::IO>&>
     thm_mpm_explicit_threephase_2d("THMMPMExplicitThreePhase2D");
@@ -111,62 +117,62 @@ static Register<mpm::MPM, mpm::THMMPMSemiImplicitTwoPhase<3>,
                 const std::shared_ptr<mpm::IO>&>
     thm_mpm_semi_implicit_twophase_3d("THMMPMSemiImplicitTwoPhase3D");
 
-// 2D Explicit THM-MPM with phase change
+// 2D Explicit TH-MPM for Saturated Frozen Soil
 static Register<mpm::MPM, mpm::THMPMExplicitSatFrozen<2>,
                 const std::shared_ptr<mpm::IO>&>
     th_mpm_explicit_saturated_frozen_2d("THMPMExplicitSatFrozen2D");
 
-// 3D SemiImplicit THM-MPM with phase change
+// 3D Explicit TH-MPM for Saturated Frozen Soil
 static Register<mpm::MPM, mpm::THMPMExplicitSatFrozen<3>,
                 const std::shared_ptr<mpm::IO>&>
     th_mpm_explicit_saturated_frozen_3d("THMPMExplicitSatFrozen3D");
 
-// 2D Explicit THM-MPM for saturated frozen soil
+// 2D Explicit THM-MPM for Saturated Frozen Soil
 static Register<mpm::MPM, mpm::THMMPMExplicitSatFrozen<2>,
                 const std::shared_ptr<mpm::IO>&>
     thm_mpm_explicit_sat_frozen_2d("THMMPMExplicitSatFrozen2D");
 
-// 3D Explicit THM-MPM for saturated frozen soil
+// 3D Explicit THM-MPM for Saturated Frozen Soil
 static Register<mpm::MPM, mpm::THMMPMExplicitSatFrozen<3>,
                 const std::shared_ptr<mpm::IO>&>
     thm_mpm_explicit_sat_frozen_3d("THMMPMExplicitSatFrozen3D");
 
-// 2D Semi-Implicit THM-MPM for saturated frozen soil
+// 2D Semi-Implicit THM-MPM for Saturated Frozen Soil
 static Register<mpm::MPM, mpm::THMMPMSemiImplicitSatFrozen<2>,
                 const std::shared_ptr<mpm::IO>&>
     thm_mpm_semi_implicit_sat_frozen_2d("THMMPMSemiImplicitSatFrozen2D");
 
-// 3D Semi-Implicit THM-MPM for saturated frozen soil
+// 3D Semi-Implicit THM-MPM for Saturated Frozen Soil
 static Register<mpm::MPM, mpm::THMMPMSemiImplicitSatFrozen<3>,
                 const std::shared_ptr<mpm::IO>&>
     thm_mpm_semi_implicit_sat_frozen_3d("THMMPMSemiImplicitSatFrozen3D");
 
-// 2D Semi-Implicit THM-MPM for unsaturated frozen soil
+// 2D Semi-Implicit THM-MPM for Unsaturated Frozen Soil
 static Register<mpm::MPM, mpm::THMMPMSemiImplicitUnsatFrozen<2>,
                 const std::shared_ptr<mpm::IO>&>
     thm_mpm_semi_implicit_unsat_frozen_2d("THMMPMSemiImplicitUnsatFrozen2D");
 
-// 3D Semi-Implicit THM-MPM for unsaturated frozen soil
+// 3D Semi-Implicit THM-MPM for Unsaturated Frozen Soil
 static Register<mpm::MPM, mpm::THMMPMSemiImplicitUnsatFrozen<3>,
                 const std::shared_ptr<mpm::IO>&>
     thm_mpm_semi_implicit_unsat_frozen_3d("THMMPMSemiImplicitUnsatFrozen3D");
 
-// 2D Explicit Thermo-Hydro-Chemical MPM for Hydrate-Bearing Sediment
+// 2D Explicit THC-MPM for Hydrate-Bearing Sediment
 static Register<mpm::MPM, mpm::THCMPMExplicitHydrate<2>,
                 const std::shared_ptr<mpm::IO>&>
     thc_mpm_explicit_hydrate_2d("THCMPMExplicitHydrate2D");
 
-// 3D Explicit Thermo-Hydro-Chemical MPM for Hydrate-Bearing Sediment
+// 3D Explicit THC-MPM for Hydrate-Bearing Sediment
 static Register<mpm::MPM, mpm::THCMPMExplicitHydrate<3>,
                 const std::shared_ptr<mpm::IO>&>
     thc_mpm_explicit_hydrate_3d("THCMPMExplicitHydrate3D");
 
-// 2D Explicit Thermo-Hydro-Mechanical-Chemical MPM for Hydrate-Bearing Sediment
+// 2D Explicit THMC-MPM for Hydrate-Bearing Sediment
 static Register<mpm::MPM, mpm::THMCMPMExplicitHydrate<2>,
                 const std::shared_ptr<mpm::IO>&>
     thmc_mpm_explicit_hydrate_2d("THMCMPMExplicitHydrate2D");
 
-// 3D Explicit Thermo-Hydro-Mechanical-Chemical MPM for Hydrate-Bearing Sediment
+// 3D Explicit THMC-MPM for Hydrate-Bearing Sediment
 static Register<mpm::MPM, mpm::THMCMPMExplicitHydrate<3>,
                 const std::shared_ptr<mpm::IO>&>
     thmc_mpm_explicit_hydrate_3d("THMCMPMExplicitHydrate3D");
