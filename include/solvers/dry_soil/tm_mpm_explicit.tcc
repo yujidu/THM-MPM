@@ -1,9 +1,9 @@
 //! Constructor
 template <unsigned Tdim>
-mpm::ThermoMPMExplicit<Tdim>::ThermoMPMExplicit(const std::shared_ptr<IO>& io)
+mpm::TMMPMExplicit<Tdim>::TMMPMExplicit(const std::shared_ptr<IO>& io)
     : mpm::MPMBase<Tdim>(io) {
   //! Logger
-  console_ = spdlog::get("ThermoMPMExplicit");
+  console_ = spdlog::get("TMMPMExplicit");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -16,7 +16,7 @@ mpm::ThermoMPMExplicit<Tdim>::ThermoMPMExplicit(const std::shared_ptr<IO>& io)
 
 //! Domain decomposition
 template <unsigned Tdim>
-void mpm::ThermoMPMExplicit<Tdim>::mpi_domain_decompose() {
+void mpm::TMMPMExplicit<Tdim>::mpi_domain_decompose() {
 #ifdef USE_MPI
   // Initialise MPI rank and size
   int mpi_rank = 0;
@@ -69,7 +69,7 @@ void mpm::ThermoMPMExplicit<Tdim>::mpi_domain_decompose() {
 
 //! MPM Explicit pressure smoothing
 template <unsigned Tdim>
-void mpm::ThermoMPMExplicit<Tdim>::pressure_smoothing(unsigned phase) {
+void mpm::TMMPMExplicit<Tdim>::pressure_smoothing(unsigned phase) {
   // Assign pressure to nodes
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
@@ -99,7 +99,7 @@ void mpm::ThermoMPMExplicit<Tdim>::pressure_smoothing(unsigned phase) {
 
 //! MPM Explicit compute stress strain
 template <unsigned Tdim>
-void mpm::ThermoMPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
+void mpm::TMMPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
   // Iterate over each particle to calculate mechancial strain
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::update_particle_strain, std::placeholders::_1, dt_));
@@ -130,7 +130,7 @@ void mpm::ThermoMPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
 
 // Compute time step size
 template <unsigned Tdim>
-void mpm::ThermoMPMExplicit<Tdim>::compute_critical_timestep_size(double dt) {
+void mpm::TMMPMExplicit<Tdim>::compute_critical_timestep_size(double dt) {
   const unsigned phase = 0;
   // cell minimum size
   auto mesh_props = io_->json_object("mesh");
@@ -168,7 +168,7 @@ void mpm::ThermoMPMExplicit<Tdim>::compute_critical_timestep_size(double dt) {
 
 //! Thermo-mechanical MPM Explicit solver
 template <unsigned Tdim>
-bool mpm::ThermoMPMExplicit<Tdim>::solve() {
+bool mpm::TMMPMExplicit<Tdim>::solve() {
   bool status = true;
   
   console_->info("MPM analysis type {}", io_->analysis_type());
@@ -633,7 +633,7 @@ bool mpm::ThermoMPMExplicit<Tdim>::solve() {
 
 //! Thermo-mechancial MPM explicit solver for MPM-DEM
 template <unsigned Tdim>
-bool mpm::ThermoMPMExplicit<Tdim>::pre_process() {
+bool mpm::TMMPMExplicit<Tdim>::pre_process() {
   bool status = true;
   console_->info("MPM analysis type {}", io_->analysis_type());
 
@@ -706,7 +706,7 @@ bool mpm::ThermoMPMExplicit<Tdim>::pre_process() {
 
 // Main loop
 template <unsigned Tdim>
-bool mpm::ThermoMPMExplicit<Tdim>::get_deformation_task() {
+bool mpm::TMMPMExplicit<Tdim>::get_deformation_task() {
   bool status = true;
   if (step_ < nsteps_) {
 
@@ -834,7 +834,7 @@ bool mpm::ThermoMPMExplicit<Tdim>::get_deformation_task() {
 }
 
 template <unsigned Tdim>
-void mpm::ThermoMPMExplicit<Tdim>::get_info(unsigned& dim, bool& resume,
+void mpm::TMMPMExplicit<Tdim>::get_info(unsigned& dim, bool& resume,
                                       unsigned& checkpoint_step) {
   dim = Tdim;
   if (analysis_.find("resume") != analysis_.end())
@@ -847,7 +847,7 @@ void mpm::ThermoMPMExplicit<Tdim>::get_info(unsigned& dim, bool& resume,
 }
 
 template <unsigned Tdim>
-void mpm::ThermoMPMExplicit<Tdim>::get_status(double& dt, unsigned& step,
+void mpm::TMMPMExplicit<Tdim>::get_status(double& dt, unsigned& step,
                                         unsigned& nsteps,
                                         unsigned& output_steps) {
   dt = dt_;
@@ -857,7 +857,7 @@ void mpm::ThermoMPMExplicit<Tdim>::get_status(double& dt, unsigned& step,
 }
 
 template <unsigned Tdim>
-bool mpm::ThermoMPMExplicit<Tdim>::send_deformation_task(
+bool mpm::TMMPMExplicit<Tdim>::send_deformation_task(
     std::vector<unsigned>& id,
     std::vector<Eigen::MatrixXd>& displacement_gradients) {
   bool status = true;
@@ -866,7 +866,7 @@ bool mpm::ThermoMPMExplicit<Tdim>::send_deformation_task(
 }
 
 template <unsigned Tdim>
-bool mpm::ThermoMPMExplicit<Tdim>::send_temperature_task(
+bool mpm::TMMPMExplicit<Tdim>::send_temperature_task(
     std::vector<unsigned>& id,
     std::vector<double>& particle_temperature) {
   bool status = true;
@@ -875,7 +875,7 @@ bool mpm::ThermoMPMExplicit<Tdim>::send_temperature_task(
 }
 
 template <unsigned Tdim>
-bool mpm::ThermoMPMExplicit<Tdim>::set_stress_task(const Eigen::MatrixXd& stresses,
+bool mpm::TMMPMExplicit<Tdim>::set_stress_task(const Eigen::MatrixXd& stresses,
                                              bool increment) {
   bool status = true;
   if (step_ < nsteps_) {
@@ -888,7 +888,7 @@ bool mpm::ThermoMPMExplicit<Tdim>::set_stress_task(const Eigen::MatrixXd& stress
 }
 
 template <unsigned Tdim>
-bool mpm::ThermoMPMExplicit<Tdim>::set_porosity_task(
+bool mpm::TMMPMExplicit<Tdim>::set_porosity_task(
     const Eigen::MatrixXd& porosities) {
   bool status = true;
   if (step_ < nsteps_) {
@@ -901,7 +901,7 @@ bool mpm::ThermoMPMExplicit<Tdim>::set_porosity_task(
 }
 
 template <unsigned Tdim>
-bool mpm::ThermoMPMExplicit<Tdim>::set_fabric_task(std::string fabric_type,
+bool mpm::TMMPMExplicit<Tdim>::set_fabric_task(std::string fabric_type,
                                              const Eigen::MatrixXd& fabrics) {
   bool status = true;
   if (step_ < nsteps_) {
@@ -914,7 +914,7 @@ bool mpm::ThermoMPMExplicit<Tdim>::set_fabric_task(std::string fabric_type,
 }
 
 template <unsigned Tdim>
-bool mpm::ThermoMPMExplicit<Tdim>::set_rotation_task(
+bool mpm::TMMPMExplicit<Tdim>::set_rotation_task(
     const Eigen::MatrixXd& rotations) {
   bool status = true;
   if (step_ < nsteps_) {
@@ -927,7 +927,7 @@ bool mpm::ThermoMPMExplicit<Tdim>::set_rotation_task(
 }
 
 template <unsigned Tdim>
-bool mpm::ThermoMPMExplicit<Tdim>::update_state_task() {
+bool mpm::TMMPMExplicit<Tdim>::update_state_task() {
   bool status = true;
   if (step_ < nsteps_) {
     // Phase

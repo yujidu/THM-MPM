@@ -1,38 +1,61 @@
-#ifndef MPM_THERMO_MPM_EXPLICIT_TWOPHASE_H_
-#define MPM_THERMO_MPM_EXPLICIT_TWOPHASE_H_
+#ifndef THM_MPM_SEMI_IMPLICIT_UNSAT_FROZEN_H_
+#define THM_MPM_SEMI_IMPLICIT_UNSAT_FROZEN_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
 #endif
 
+#include <iostream>
 #include "solvers/mpm_base.h"
+#include <cmath>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#include "matrix/assembler_base.h"
+#include "matrix/assembler_eigen_semi_implicit_twophase.h"
+#include "matrix/cg_eigen.h"
+#include "matrix/solver_base.h"
 
 namespace mpm {
 
-//! ThermoMPMExplicitTwoPhase class
-//! \brief A class that implements the fully explicit TWO phase mpm
-//! \details A TWO-phase explicit MPM
+//! THMMPMSemiImplicitUnsatFrozen class
+//! \brief A class that implements the semi-implicit one phase mpm
+//! \details A two-phase semi-implicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class ThermoMPMExplicitTwoPhase : public MPMBase<Tdim> {
+class THMMPMSemiImplicitUnsatFrozen : public MPMBase<Tdim> {
  public:
   //! Default constructor
-  ThermoMPMExplicitTwoPhase(const std::shared_ptr<IO>& io);
+  THMMPMSemiImplicitUnsatFrozen(const std::shared_ptr<IO>& io);
+
+  //! Domain decomposition
+  void mpi_domain_decompose();
+
+  //! Compute corrected velocity
+  bool compute_corrected_velocity();
+
+  //! Compute corrected velocity
+  bool compute_corrected_force();
+
+  //! Return matrix assembler pointer
+  std::shared_ptr<mpm::AssemblerBase<Tdim>> matrix_assembler() {
+    return matrix_assembler_;
+  }
 
   //! Solve
   bool solve() override;
-
-  //! Compute stress strain
-  void compute_stress_strain();
 
   //! Pressure smoothing
   //! \param[in] phase Phase to smooth pressure
   void pressure_smoothing(unsigned phase) override;
 
-    //! Pre process for MPM-DEM
+  // Compute time step size
+  void compute_critical_timestep_size(double dt); 
+
   bool pre_process() override;
 
-  //! Get deformation gradient for MPM-DEM
   bool get_deformation_task() override;
 
   //! Get analysis information
@@ -47,7 +70,12 @@ class ThermoMPMExplicitTwoPhase : public MPMBase<Tdim> {
       std::vector<unsigned>& id,
       std::vector<Eigen::MatrixXd>& displacement_gradients) override;
 
-  //! Set particle stress
+  //! send temperature task
+  bool send_temperature_task(
+      std::vector<unsigned>& id,
+      std::vector<double>& particle_temperature) override;
+
+  //! Set particle stess
   bool set_stress_task(const Eigen::MatrixXd& stresses,
                        bool increment) override;
 
@@ -61,11 +89,24 @@ class ThermoMPMExplicitTwoPhase : public MPMBase<Tdim> {
   // Set particle rotation
   bool set_rotation_task(const Eigen::MatrixXd& rotations) override;
 
-  // Update particle state eg position, velocity
   bool update_state_task() override;
 
+  //! Class private functions
+ private:
+  //! Initialise matrix
+  virtual bool initialise_matrix();
 
- protected:
+  //! Initialise matrix
+  virtual bool reinitialise_matrix();
+
+  //! Compute intermediate velocity
+  bool compute_intermediate_velocity(std::string solver_type = "lscg");
+
+  //! Compute poisson equation
+  bool compute_poisson_equation(std::string solver_type = "cg");
+
+  //! Class private variables
+ private:
   // Generate a unique id for the analysis
   using mpm::MPMBase<Tdim>::uuid_;
   //! Time step size
@@ -86,7 +127,7 @@ class ThermoMPMExplicitTwoPhase : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::console_;
   //! Stress update
   using mpm::MPMBase<Tdim>::stress_update_;
-  //! pic value
+  //! velocity update
   using mpm::MPMBase<Tdim>::pic_;
   //! Gravity
   using mpm::MPMBase<Tdim>::gravity_;
@@ -100,13 +141,34 @@ class ThermoMPMExplicitTwoPhase : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::write_vtk_;
   //! Write hdf5
   using mpm::MPMBase<Tdim>::write_hdf5_;   
+  //! Damping type
+  using mpm::MPMBase<Tdim>::damping_type_;
   //! Damping factor
   using mpm::MPMBase<Tdim>::damping_factor_;
-
+  //! Pressure smoothing
+  bool pressure_smoothing_{false};
+  //! Variable timestep
+  bool variable_timestep_{false};
+  //! Log output steps
+  bool log_output_steps_{false};
+  // Projection method paramter (beta)
+  double beta_{1};
   // Free surface detection
   std::string free_surface_particle_{"detect"};
+  //! Matrix assembler object
+  std::shared_ptr<mpm::AssemblerBase<Tdim>> matrix_assembler_;
+  //! Matrix solver object
+  std::shared_ptr<mpm::SolverBase<Tdim>> matrix_solver_;
   //! Volume tolerance for free surface
-  double volume_tolerance_{0.25};
+  double volume_tolerance_{0};
+  // Reserve memeory
+  int K_entries_number_{20};
+  int L_entries_number_{20};
+  int F_entries_number_{20};
+  int T_entries_number_{20};
+  int N_entries_number_{20};
+  int K_cor_entries_number_{20};
+  int num_threads{4};
 
   // Time step matrix
   using mpm::MPMBase<Tdim>::dt_matrix_;
@@ -114,25 +176,19 @@ class ThermoMPMExplicitTwoPhase : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::nsteps_matrix_;
   // Time step matrix size
   using mpm::MPMBase<Tdim>::dt_matrix_size;
-  //! Interface
-  bool interface_{false};
   // Current time
   double current_time_{0};
-    // Output number
+  // Output number
   int No_output{0};
-
- private:
-  //! Pressure smoothing
-  bool pressure_smoothing_{false};
-    //! Variable timestep
-  bool variable_timestep_{false};
-  //! Log output steps
-  bool log_output_steps_{false};
+  //！evaluate drag force term implicitly
+  bool implicit_drag_force_{true};
+  // evaluate drag force term fully implicitly
+  double alpha_{1};
 
   std::chrono::time_point<std::chrono::steady_clock> solver_begin;
-}; 
+};  // 
 }  // namespace mpm
 
-#include "thm_mpm_explicit_twophase.tcc"
+#include "thm_mpm_semi_implicit_unsaturated_frozen.tcc"
 
-#endif  // MPM_THERMO_MPM_EXPLICIT_TWOPHASE_H_
+#endif

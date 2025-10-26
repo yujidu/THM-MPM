@@ -1,15 +1,15 @@
 //! Constructor
 template <unsigned Tdim>
-mpm::HydroMPMExplicitMHBS<Tdim>::HydroMPMExplicitMHBS(
+mpm::THCMPMExplicitHydrate<Tdim>::THCMPMExplicitHydrate(
     const std::shared_ptr<IO>& io)
     : mpm::MPMBase<Tdim>(io) {
   //! Logger
-  console_ = spdlog::get("HydroMPMExplicitMHBS");
+  console_ = spdlog::get("THCMPMExplicitHydrate");
 }
 
 //! Thermo-hydro-mechncial MPM Explicit solver
 template <unsigned Tdim>
-bool mpm::HydroMPMExplicitMHBS<Tdim>::solve() {
+bool mpm::THCMPMExplicitHydrate<Tdim>::solve() {
   bool status = true;
 
   console_->info("MPM analysis type {}", io_->analysis_type());
@@ -300,7 +300,7 @@ bool mpm::HydroMPMExplicitMHBS<Tdim>::solve() {
 
 // Compute time step size
 template <unsigned Tdim>
-void mpm::HydroMPMExplicitMHBS<Tdim>::compute_critical_timestep_size(double dt) {
+void mpm::THCMPMExplicitHydrate<Tdim>::compute_critical_timestep_size(double dt) {
   const unsigned soil_skeleton = mpm::ParticlePhase::Solid;
   const unsigned pore_liquid = mpm::ParticlePhase::Liquid;
   const unsigned pore_gas = mpm::ParticlePhase::Gas;

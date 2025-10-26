@@ -28,9 +28,9 @@ const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_base_logger =
 const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_logger =
     spdlog::stdout_color_st("MPMExplicit");
 
-// Create a logger for Thermo-mechanical MPM Explicit
-const std::shared_ptr<spdlog::logger> mpm::Logger::thermo_mpm_explicit_logger =
-    spdlog::stdout_color_st("ThermoMPMExplicit");
+// Create a logger for Explicit Thermo-mechanical MPM 
+const std::shared_ptr<spdlog::logger> mpm::Logger::tm_mpm_explicit_logger =
+    spdlog::stdout_color_st("TMMPMExplicit");
 
 // Create a logger for Thermal MPM Explicit
 const std::shared_ptr<spdlog::logger> mpm::Logger::thermo_mpm_implicit_logger =
@@ -38,18 +38,18 @@ const std::shared_ptr<spdlog::logger> mpm::Logger::thermo_mpm_implicit_logger =
 
 // Create a logger for MPM Explicit Two Phase
 const std::shared_ptr<spdlog::logger>
-    mpm::Logger::mpm_explicit_two_phase_logger =
-        spdlog::stdout_color_st("MPMExplicitTwoPhase");
+    mpm::Logger::hm_mpm_explicit_two_phase_logger =
+        spdlog::stdout_color_st("HMMPMExplicitTwoPhase");
 
 // Create a logger for Thermal MPM Explicit Two Phase
 const std::shared_ptr<spdlog::logger>
-    mpm::Logger::thermo_mpm_explicit_two_phase_logger =
-        spdlog::stdout_color_st("ThermoMPMExplicitTwoPhase");
+    mpm::Logger::thm_mpm_explicit_two_phase_logger =
+        spdlog::stdout_color_st("THMMPMExplicitTwoPhase");
 
 // Create a logger for Thermal MPM Explicit Three Phase
 const std::shared_ptr<spdlog::logger>
-    mpm::Logger::thermo_mpm_explicit_three_phase_logger =
-        spdlog::stdout_color_st("ThermoMPMExplicitThreePhase");
+    mpm::Logger::thm_mpm_explicit_three_phase_logger =
+        spdlog::stdout_color_st("THMMPMExplicitThreePhase");
 
 // Create a logger for Explicit THM-MPM For Saturated Frozen Soil
 const std::shared_ptr<spdlog::logger>
@@ -58,13 +58,13 @@ const std::shared_ptr<spdlog::logger>
 
 // Create a logger for MPM Semi Implicit Two Phase
 const std::shared_ptr<spdlog::logger>
-    mpm::Logger::mpm_semi_implicit_two_phase_logger =
-        spdlog::stdout_color_st("MPMSemiImplicitTwoPhase");
+    mpm::Logger::hm_mpm_semi_implicit_two_phase_logger =
+        spdlog::stdout_color_st("HMMPMSemiImplicitTwoPhase");
 
 // Create a logger for Thermal MPM Semi Implicit Two Phase
 const std::shared_ptr<spdlog::logger>
-    mpm::Logger::thermo_mpm_semi_implicit_two_phase_logger =
-        spdlog::stdout_color_st("ThermoMPMSemiImplicitTwoPhase");
+    mpm::Logger::thm_mpm_semi_implicit_two_phase_logger =
+        spdlog::stdout_color_st("THMMPMSemiImplicitTwoPhase");
 
 // Create a logger for Semi Implicit THM-MPM For Saturated Frozen Soil
 const std::shared_ptr<spdlog::logger>
@@ -78,23 +78,18 @@ const std::shared_ptr<spdlog::logger>
 
 // Create a logger for 
 const std::shared_ptr<spdlog::logger>
-    mpm::Logger::thermo_mpm_phase_change_logger =
-        spdlog::stdout_color_st("ThermoMPMPhaseChange");
+    mpm::Logger::th_mpm_explicit_sat_frozen_logger =
+        spdlog::stdout_color_st("THMPMExplicitSatFrozen");
 
 // Create a logger for 
 const std::shared_ptr<spdlog::logger>
-    mpm::Logger::thm_mpm_explicit_MHBS_logger =
-        spdlog::stdout_color_st("THMMPMExplicitMHBS");
+    mpm::Logger::thmc_mpm_explicit_hydrate_logger =
+        spdlog::stdout_color_st("THMCMPMExplicitHydrate");
 
 // Create a logger for 
 const std::shared_ptr<spdlog::logger>
-    mpm::Logger::hydro_mpm_explicit_logger =
-        spdlog::stdout_color_st("HydroMPMExplicit");
-
-// Create a logger for 
-const std::shared_ptr<spdlog::logger>
-    mpm::Logger::hydro_mpm_explicit_MHBS_logger =
-        spdlog::stdout_color_st("HydroMPMExplicitMHBS"); 
+    mpm::Logger::thc_mpm_explicit_hydrate_logger =
+        spdlog::stdout_color_st("THCMPMExplicitHydrate"); 
 
 // Create a logger for MPM Explicit USF
 const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_usf_logger =

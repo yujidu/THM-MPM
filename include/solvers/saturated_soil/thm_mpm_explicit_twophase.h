@@ -1,5 +1,5 @@
-#ifndef MPM_THM_MPM_EXPLICIT_MHBS_H_
-#define MPM_THM_MPM_EXPLICIT_MHBS_H_
+#ifndef MPM_THERMO_MPM_EXPLICIT_TWOPHASE_H_
+#define MPM_THERMO_MPM_EXPLICIT_TWOPHASE_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
@@ -9,15 +9,15 @@
 
 namespace mpm {
 
-//! THMMPMExplicitMHBS class
+//! THMMPMExplicitTwoPhase class
 //! \brief A class that implements the fully explicit TWO phase mpm
 //! \details A TWO-phase explicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class THMMPMExplicitMHBS : public MPMBase<Tdim> {
+class THMMPMExplicitTwoPhase : public MPMBase<Tdim> {
  public:
   //! Default constructor
-  THMMPMExplicitMHBS(const std::shared_ptr<IO>& io);
+  THMMPMExplicitTwoPhase(const std::shared_ptr<IO>& io);
 
   //! Solve
   bool solve() override;
@@ -29,11 +29,10 @@ class THMMPMExplicitMHBS : public MPMBase<Tdim> {
   //! \param[in] phase Phase to smooth pressure
   void pressure_smoothing(unsigned phase) override;
 
-  // Compute time step size
-  void compute_critical_timestep_size(double dt); 
-
+    //! Pre process for MPM-DEM
   bool pre_process() override;
 
+  //! Get deformation gradient for MPM-DEM
   bool get_deformation_task() override;
 
   //! Get analysis information
@@ -48,26 +47,23 @@ class THMMPMExplicitMHBS : public MPMBase<Tdim> {
       std::vector<unsigned>& id,
       std::vector<Eigen::MatrixXd>& displacement_gradients) override;
 
-  //! send temperature task
-  bool send_saturation_task(
-      std::vector<unsigned>& id,
-      std::vector<double>& hydrate_saturation) override;
-
-  //! Set particle stess
+  //! Set particle stress
   bool set_stress_task(const Eigen::MatrixXd& stresses,
-                        bool increment) override;
+                       bool increment) override;
 
   //! Set particle porosity
   bool set_porosity_task(const Eigen::MatrixXd& porosities) override;
 
   // Set particle fabric
   bool set_fabric_task(std::string fabric_type,
-                        const Eigen::MatrixXd& fabrics) override;
+                       const Eigen::MatrixXd& fabrics) override;
 
   // Set particle rotation
   bool set_rotation_task(const Eigen::MatrixXd& rotations) override;
 
+  // Update particle state eg position, velocity
   bool update_state_task() override;
+
 
  protected:
   // Generate a unique id for the analysis
@@ -92,8 +88,6 @@ class THMMPMExplicitMHBS : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::stress_update_;
   //! pic value
   using mpm::MPMBase<Tdim>::pic_;
-  //! PIC value
-  using mpm::MPMBase<Tdim>::pic_t_; 
   //! Gravity
   using mpm::MPMBase<Tdim>::gravity_;
   //! Mesh object
@@ -134,13 +128,11 @@ class THMMPMExplicitMHBS : public MPMBase<Tdim> {
   bool variable_timestep_{false};
   //! Log output steps
   bool log_output_steps_{false};
-  // DEBUG
-  bool debug_{false};
 
   std::chrono::time_point<std::chrono::steady_clock> solver_begin;
 }; 
 }  // namespace mpm
 
-#include "thm_mpm_explicit_MHBS.tcc"
+#include "thm_mpm_explicit_twophase.tcc"
 
 #endif  // MPM_THERMO_MPM_EXPLICIT_TWOPHASE_H_

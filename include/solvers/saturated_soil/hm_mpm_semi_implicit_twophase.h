@@ -1,5 +1,5 @@
-#ifndef MPM_MPM_EXPLICIT_TWOPHASE_H_
-#define MPM_MPM_EXPLICIT_TWOPHASE_H_
+#ifndef MPM_MPM_SEMI_IMPLICIT_TWOPHASE_H_
+#define MPM_MPM_SEMI_IMPLICIT_TWOPHASE_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
@@ -7,22 +7,41 @@
 
 #include "solvers/mpm_base.h"
 
+#include "matrix/assembler_base.h"
+#include "matrix/assembler_eigen_semi_implicit_twophase.h"
+#include "matrix/cg_eigen.h"
+#include "matrix/solver_base.h"
+
 namespace mpm {
 
-//! MPMExplicit class
-//! \brief A class that implements the fully explicit one phase mpm
-//! \details A single-phase explicit MPM
+//! MPMSemiImplicit class
+//! \brief A class that implements the semi-implicit one phase mpm
+//! \details A two-phase semi-implicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class MPMExplicitTwoPhase : public MPMBase<Tdim> {
+class HMMPMSemiImplicitTwoPhase : public MPMBase<Tdim> {
  public:
   //! Default constructor
-  MPMExplicitTwoPhase(const std::shared_ptr<IO>& io);
+  HMMPMSemiImplicitTwoPhase(const std::shared_ptr<IO>& io);
+
+  //! Compute corrected velocity
+  bool compute_corrected_velocity();
+
+  //! Compute corrected velocity
+  bool compute_corrected_force();
+
+  //! Return matrix assembler pointer
+  std::shared_ptr<mpm::AssemblerBase<Tdim>> matrix_assembler() {
+    return matrix_assembler_;
+  }
 
   //! Solve
   bool solve() override;
 
-   //! Pre process for MPM-DEM
+  // Compute time step size
+  void compute_critical_timestep_size(double dt);   
+
+  //! Pre process for MPM-DEM
   bool pre_process() override;
 
   //! Get deformation gradient for MPM-DEM
@@ -61,7 +80,22 @@ class MPMExplicitTwoPhase : public MPMBase<Tdim> {
   //! \param[in] phase Phase to smooth pressure
   void pressure_smoothing(unsigned phase) override;
 
- protected:
+  //! Class private functions
+ private:
+  //! Initialise matrix
+  virtual bool initialise_matrix();
+
+  //! Initialise matrix
+  virtual bool reinitialise_matrix();
+
+  //! Compute intermediate velocity
+  bool compute_intermediate_velocity(std::string solver_type = "lscg");
+
+  //! Compute poisson equation
+  bool compute_poisson_equation(std::string solver_type = "cg");
+
+  //! Class private variables
+ private:
   // Generate a unique id for the analysis
   using mpm::MPMBase<Tdim>::uuid_;
   //! Time step size
@@ -82,7 +116,7 @@ class MPMExplicitTwoPhase : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::console_;
   //! Stress update
   using mpm::MPMBase<Tdim>::stress_update_;
-  //! pic value
+  //! velocity update
   using mpm::MPMBase<Tdim>::pic_;
   //! Gravity
   using mpm::MPMBase<Tdim>::gravity_;
@@ -95,14 +129,41 @@ class MPMExplicitTwoPhase : public MPMBase<Tdim> {
   //! Write VTK
   using mpm::MPMBase<Tdim>::write_vtk_;
   //! Write hdf5
-  using mpm::MPMBase<Tdim>::write_hdf5_;    
+  using mpm::MPMBase<Tdim>::write_hdf5_;   
+  //! Damping type
+  using mpm::MPMBase<Tdim>::damping_type_;
   //! Damping factor
   using mpm::MPMBase<Tdim>::damping_factor_;
-
+  //! Pressure smoothing
+  bool pressure_smoothing_{false};
+  //! Variable timestep
+  bool variable_timestep_{false};
+  //! Log output steps
+  bool log_output_steps_{false};
+  // Projection method paramter (beta)
+  double beta_{1};
   // Free surface detection
   std::string free_surface_particle_{"detect"};
+  //! Matrix assembler object
+  std::shared_ptr<mpm::AssemblerBase<Tdim>> matrix_assembler_;
+  //! Matrix solver object
+  std::shared_ptr<mpm::SolverBase<Tdim>> matrix_solver_;
   //! Volume tolerance for free surface
   double volume_tolerance_{0.25};
+  // Reserve memeory
+  int K_entries_number_{20};
+  int L_entries_number_{20};
+  int F_entries_number_{20};
+  int T_entries_number_{20};
+  int K_cor_entries_number_{20};
+  int num_threads{4};
+  //！evaluate drag force term implicitly
+  bool implicit_drag_force_{true};
+  // evaluate drag force term fully implicitly
+  double alpha_{1};
+  // Nodewise implicit
+  bool nodewise_implicit_{true};
+
   // Time step matrix
   using mpm::MPMBase<Tdim>::dt_matrix_;
   // Steps
@@ -114,19 +175,10 @@ class MPMExplicitTwoPhase : public MPMBase<Tdim> {
   // Output number
   int No_output{0};
 
- private:
-  //! Pressure smoothing
-  bool pressure_smoothing_{false};
-  //! Variable timestep
-  bool variable_timestep_{false};
-  //! Log output steps
-  bool log_output_steps_{false};
-
-  //! Solver begin time
-  std::chrono::time_point<std::chrono::steady_clock> solver_begin;  
-};  // MPMExplicit class
+  std::chrono::time_point<std::chrono::steady_clock> solver_begin;
+};  // MPMSemiImplicit class
 }  // namespace mpm
 
-#include "mpm_explicit_twophase.tcc"
+#include "hm_mpm_semi_implicit_twophase.tcc"
 
-#endif  // MPM_MPM_EXPLICIT_H_
+#endif  // MPM_MPM_SEMI_IMPLICIT_H_

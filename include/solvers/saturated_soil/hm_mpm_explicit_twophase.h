@@ -1,45 +1,28 @@
-#ifndef MPM_THERMO_MPM_EXPLICIT_H_
-#define MPM_THERMO_MPM_EXPLICIT_H_
+#ifndef HM_MPM_EXPLICIT_TWOPHASE_H_
+#define HM_MPM_EXPLICIT_TWOPHASE_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
 #endif
 
 #include "solvers/mpm_base.h"
-#include <Eigen/Dense>
+
 namespace mpm {
 
-//! ThermoMPMExplicit class
-//! \brief A class that implements the fully explicit one phase thermal-mechanical mpm
-//! \details A single-phase thermal-mechanical explicit MPM
+//! MPMExplicit class
+//! \brief A class that implements the fully explicit one phase mpm
+//! \details A single-phase explicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class ThermoMPMExplicit : public MPMBase<Tdim> {
+class HMMPMExplicitTwoPhase : public MPMBase<Tdim> {
  public:
   //! Default constructor
-  ThermoMPMExplicit(const std::shared_ptr<IO>& io);
-
-  //! Domain decomposition
-  void mpi_domain_decompose();
+  HMMPMExplicitTwoPhase(const std::shared_ptr<IO>& io);
 
   //! Solve
   bool solve() override;
 
-  //! Pressure smoothing
-  //! \param[in] phase Phase to smooth pressure
-  void pressure_smoothing(unsigned phase) override;
-
-  //! Compute stress strain
-  //! \param[in] phase Phase to smooth pressure
-  void compute_stress_strain(unsigned phase);
-  
-  //! Apply temperature constraints
-  void apply_nodal_temperature_constraints(unsigned phase);
-
-  // Compute time step size
-  void compute_critical_timestep_size(double dt);  
-
-  //! Pre process for MPM-DEM
+   //! Pre process for MPM-DEM
   bool pre_process() override;
 
   //! Get deformation gradient for MPM-DEM
@@ -53,17 +36,11 @@ class ThermoMPMExplicit : public MPMBase<Tdim> {
   void get_status(double& dt, unsigned& step, unsigned& nsteps,
                   unsigned& output_steps) override;
 
-  //! send deformation task
   bool send_deformation_task(
       std::vector<unsigned>& id,
       std::vector<Eigen::MatrixXd>& displacement_gradients) override;
 
-  //! send temperature task
-  bool send_temperature_task(
-      std::vector<unsigned>& id,
-      std::vector<double>& particle_temperature) override;    
-
-  //! Set particle stress
+  //! Set particle stess
   bool set_stress_task(const Eigen::MatrixXd& stresses,
                        bool increment) override;
 
@@ -80,6 +57,10 @@ class ThermoMPMExplicit : public MPMBase<Tdim> {
   // Update particle state eg position, velocity
   bool update_state_task() override;
 
+  //! Pressure smoothing
+  //! \param[in] phase Phase to smooth pressure
+  void pressure_smoothing(unsigned phase) override;
+
  protected:
   // Generate a unique id for the analysis
   using mpm::MPMBase<Tdim>::uuid_;
@@ -91,10 +72,6 @@ class ThermoMPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::nsteps_;
   //! Output steps
   using mpm::MPMBase<Tdim>::output_steps_;
-  //! write hdf5
-  using mpm::MPMBase<Tdim>::write_hdf5_;
-  //! write vtk
-  using mpm::MPMBase<Tdim>::write_vtk_;
   //! A unique ptr to IO object
   using mpm::MPMBase<Tdim>::io_;
   //! JSON analysis object
@@ -103,16 +80,10 @@ class ThermoMPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::post_process_;
   //! Logger
   using mpm::MPMBase<Tdim>::console_;
-
-#ifdef USE_GRAPH_PARTITIONING
-  //! Graph
-  using mpm::MPMBase<Tdim>::graph_;
-#endif
-
-  //! PIC value
+  //! Stress update
+  using mpm::MPMBase<Tdim>::stress_update_;
+  //! pic value
   using mpm::MPMBase<Tdim>::pic_;
-  //! PIC value
-  using mpm::MPMBase<Tdim>::pic_t_;
   //! Gravity
   using mpm::MPMBase<Tdim>::gravity_;
   //! Mesh object
@@ -120,26 +91,18 @@ class ThermoMPMExplicit : public MPMBase<Tdim> {
   //! Materials
   using mpm::MPMBase<Tdim>::materials_;
   //! VTK attributes
-  using mpm::MPMBase<Tdim>::vtk_attributes_;  
-  //! Node concentrated force
-  using mpm::MPMBase<Tdim>::set_node_concentrated_force_;
-  //! Damping type
-  using mpm::MPMBase<Tdim>::damping_type_;
+  using mpm::MPMBase<Tdim>::vtk_attributes_;
+  //! Write VTK
+  using mpm::MPMBase<Tdim>::write_vtk_;
+  //! Write hdf5
+  using mpm::MPMBase<Tdim>::write_hdf5_;    
   //! Damping factor
   using mpm::MPMBase<Tdim>::damping_factor_;
 
- private:
-  //! Pressure smoothing
-  bool pressure_smoothing_{false};
-  //! Variable timestep
-  bool variable_timestep_{false};
-  //! Log output steps
-  bool log_output_steps_{false};
-  //! Interface
-  bool interface_{false};
-  //! Solver begin time
-  std::chrono::time_point<std::chrono::steady_clock> solver_begin;
-
+  // Free surface detection
+  std::string free_surface_particle_{"detect"};
+  //! Volume tolerance for free surface
+  double volume_tolerance_{0.25};
   // Time step matrix
   using mpm::MPMBase<Tdim>::dt_matrix_;
   // Steps
@@ -150,24 +113,20 @@ class ThermoMPMExplicit : public MPMBase<Tdim> {
   double current_time_{0};
   // Output number
   int No_output{0};
-  // Free surface detection
-  std::string free_surface_particle_{"detect"};
-  //! Volume tolerance for free surface
-  double volume_tolerance_{0.25}; 
-  //! Virtual flux
-  bool virtual_flux_{false};
-  // Flux type
-  std::string flux_type_{"convective"};
-  // Heat transfer coeff
-  double heat_transfer_coeff_{0};
-  // Ambient temperature
-  double ambient_temperature_{0};
-  // COnductive flux
-  double flux_{0};
 
-};  // ThermoMPMExplicit class
+ private:
+  //! Pressure smoothing
+  bool pressure_smoothing_{false};
+  //! Variable timestep
+  bool variable_timestep_{false};
+  //! Log output steps
+  bool log_output_steps_{false};
+
+  //! Solver begin time
+  std::chrono::time_point<std::chrono::steady_clock> solver_begin;  
+};  // MPMExplicit class
 }  // namespace mpm
 
-#include "thermo_mpm_explicit.tcc"
+#include "hm_mpm_explicit_twophase.tcc"
 
-#endif  // MPM_THERMO_MPM_EXPLICIT_H_
+#endif

@@ -1,5 +1,5 @@
-#ifndef MPM_THM_MPM_SEMI_IMPLICIT_SAT_FROZEN_H_
-#define MPM_THM_MPM_SEMI_IMPLICIT_SAT_FROZEN_H_
+#ifndef THM_MPM_SEMI_IMPLICIT_TWOPHASE_H_
+#define THM_MPM_SEMI_IMPLICIT_TWOPHASE_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
@@ -20,15 +20,15 @@
 
 namespace mpm {
 
-//! THMMPMSemiImplicitSatFrozen class
+//! ThermoMPMSemiImplicit class
 //! \brief A class that implements the semi-implicit one phase mpm
 //! \details A two-phase semi-implicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class THMMPMSemiImplicitSatFrozen : public MPMBase<Tdim> {
+class THMMPMSemiImplicitTwoPhase : public MPMBase<Tdim> {
  public:
   //! Default constructor
-  THMMPMSemiImplicitSatFrozen(const std::shared_ptr<IO>& io);
+  THMMPMSemiImplicitTwoPhase(const std::shared_ptr<IO>& io);
 
   //! Domain decomposition
   void mpi_domain_decompose();
@@ -47,12 +47,8 @@ class THMMPMSemiImplicitSatFrozen : public MPMBase<Tdim> {
   //! Solve
   bool solve() override;
 
-  //! Pressure smoothing
-  //! \param[in] phase Phase to smooth pressure
-  void pressure_smoothing(unsigned phase) override;
-
   // Compute time step size
-  void compute_critical_timestep_size(double dt); 
+  void compute_critical_timestep_size(double dt);  
 
   bool pre_process() override;
 
@@ -90,6 +86,10 @@ class THMMPMSemiImplicitSatFrozen : public MPMBase<Tdim> {
   bool set_rotation_task(const Eigen::MatrixXd& rotations) override;
 
   bool update_state_task() override;
+
+  //! Pressure smoothing
+  //! \param[in] phase Phase to smooth pressure
+  void pressure_smoothing(unsigned phase) override;
 
   //! Class private functions
  private:
@@ -140,7 +140,7 @@ class THMMPMSemiImplicitSatFrozen : public MPMBase<Tdim> {
   //! Write VTK
   using mpm::MPMBase<Tdim>::write_vtk_;
   //! Write hdf5
-  using mpm::MPMBase<Tdim>::write_hdf5_;   
+  using mpm::MPMBase<Tdim>::write_hdf5_;  
   //! Damping type
   using mpm::MPMBase<Tdim>::damping_type_;
   //! Damping factor
@@ -166,9 +166,12 @@ class THMMPMSemiImplicitSatFrozen : public MPMBase<Tdim> {
   int L_entries_number_{20};
   int F_entries_number_{20};
   int T_entries_number_{20};
-  int N_entries_number_{20};
   int K_cor_entries_number_{20};
   int num_threads{4};
+  //！evaluate drag force term implicitly
+  bool implicit_drag_force_{true};
+  // evaluate drag force term fully implicitly
+  double alpha_{1};
 
   // Time step matrix
   using mpm::MPMBase<Tdim>::dt_matrix_;
@@ -180,15 +183,11 @@ class THMMPMSemiImplicitSatFrozen : public MPMBase<Tdim> {
   double current_time_{0};
   // Output number
   int No_output{0};
-  //！evaluate drag force term implicitly
-  bool implicit_drag_force_{true};
-  // evaluate drag force term fully implicitly
-  double alpha_{1};
 
   std::chrono::time_point<std::chrono::steady_clock> solver_begin;
-};  // 
+};  // ThermoMPMSemiImplicit class
 }  // namespace mpm
 
-#include "thm_mpm_semi_implicit_sat_frozen.tcc"
+#include "thm_mpm_semi_implicit_twophase.tcc"
 
-#endif  // MPM_THM_MPM_SEMI_IMPLICIT_SAT_FROZEN_H_
+#endif  // MPM_THERMO_MPM_SEMI_IMPLICIT_H_

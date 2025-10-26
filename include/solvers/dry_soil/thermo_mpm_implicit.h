@@ -1,5 +1,5 @@
-#ifndef MPM_THM_MPM_SEMI_IMPLICIT_UNSAT_FROZEN_H_
-#define MPM_THM_MPM_SEMI_IMPLICIT_UNSAT_FROZEN_H_
+#ifndef THERMO_MPM_IMPLICIT_H_
+#define THERMO_MPM_IMPLICIT_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
@@ -20,24 +20,15 @@
 
 namespace mpm {
 
-//! THMMPMSemiImplicitUnsatFrozen class
+//! ThermoMPMSemiImplicit class
 //! \brief A class that implements the semi-implicit one phase mpm
 //! \details A two-phase semi-implicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class THMMPMSemiImplicitUnsatFrozen : public MPMBase<Tdim> {
+class ThermoMPMImplicit : public MPMBase<Tdim> {
  public:
   //! Default constructor
-  THMMPMSemiImplicitUnsatFrozen(const std::shared_ptr<IO>& io);
-
-  //! Domain decomposition
-  void mpi_domain_decompose();
-
-  //! Compute corrected velocity
-  bool compute_corrected_velocity();
-
-  //! Compute corrected velocity
-  bool compute_corrected_force();
+  ThermoMPMImplicit(const std::shared_ptr<IO>& io);
 
   //! Return matrix assembler pointer
   std::shared_ptr<mpm::AssemblerBase<Tdim>> matrix_assembler() {
@@ -47,49 +38,8 @@ class THMMPMSemiImplicitUnsatFrozen : public MPMBase<Tdim> {
   //! Solve
   bool solve() override;
 
-  //! Pressure smoothing
-  //! \param[in] phase Phase to smooth pressure
-  void pressure_smoothing(unsigned phase) override;
-
   // Compute time step size
-  void compute_critical_timestep_size(double dt); 
-
-  bool pre_process() override;
-
-  bool get_deformation_task() override;
-
-  //! Get analysis information
-  void get_info(unsigned& dim, bool& resume,
-                unsigned& checkpoint_step) override;
-
-  //! get step, time
-  void get_status(double& dt, unsigned& step, unsigned& nsteps,
-                  unsigned& output_steps) override;
-
-  bool send_deformation_task(
-      std::vector<unsigned>& id,
-      std::vector<Eigen::MatrixXd>& displacement_gradients) override;
-
-  //! send temperature task
-  bool send_temperature_task(
-      std::vector<unsigned>& id,
-      std::vector<double>& particle_temperature) override;
-
-  //! Set particle stess
-  bool set_stress_task(const Eigen::MatrixXd& stresses,
-                       bool increment) override;
-
-  //! Set particle porosity
-  bool set_porosity_task(const Eigen::MatrixXd& porosities) override;
-
-  // Set particle fabric
-  bool set_fabric_task(std::string fabric_type,
-                       const Eigen::MatrixXd& fabrics) override;
-
-  // Set particle rotation
-  bool set_rotation_task(const Eigen::MatrixXd& rotations) override;
-
-  bool update_state_task() override;
+  void compute_critical_timestep_size(double dt);  
 
   //! Class private functions
  private:
@@ -98,12 +48,6 @@ class THMMPMSemiImplicitUnsatFrozen : public MPMBase<Tdim> {
 
   //! Initialise matrix
   virtual bool reinitialise_matrix();
-
-  //! Compute intermediate velocity
-  bool compute_intermediate_velocity(std::string solver_type = "lscg");
-
-  //! Compute poisson equation
-  bool compute_poisson_equation(std::string solver_type = "cg");
 
   //! Class private variables
  private:
@@ -140,7 +84,7 @@ class THMMPMSemiImplicitUnsatFrozen : public MPMBase<Tdim> {
   //! Write VTK
   using mpm::MPMBase<Tdim>::write_vtk_;
   //! Write hdf5
-  using mpm::MPMBase<Tdim>::write_hdf5_;   
+  using mpm::MPMBase<Tdim>::write_hdf5_;  
   //! Damping type
   using mpm::MPMBase<Tdim>::damping_type_;
   //! Damping factor
@@ -166,9 +110,12 @@ class THMMPMSemiImplicitUnsatFrozen : public MPMBase<Tdim> {
   int L_entries_number_{20};
   int F_entries_number_{20};
   int T_entries_number_{20};
-  int N_entries_number_{20};
   int K_cor_entries_number_{20};
   int num_threads{4};
+  //！evaluate drag force term implicitly
+  bool implicit_drag_force_{true};
+  // evaluate drag force term fully implicitly
+  double alpha_{1};
 
   // Time step matrix
   using mpm::MPMBase<Tdim>::dt_matrix_;
@@ -180,15 +127,11 @@ class THMMPMSemiImplicitUnsatFrozen : public MPMBase<Tdim> {
   double current_time_{0};
   // Output number
   int No_output{0};
-  //！evaluate drag force term implicitly
-  bool implicit_drag_force_{true};
-  // evaluate drag force term fully implicitly
-  double alpha_{1};
 
   std::chrono::time_point<std::chrono::steady_clock> solver_begin;
-};  // 
+};  // ThermoMPMSemiImplicit class
 }  // namespace mpm
 
-#include "thm_mpm_semi_implicit_unsat_frozen.tcc"
+#include "thermo_mpm_implicit.tcc"
 
-#endif  // MPM_THM_MPM_SEMI_IMPLICIT_PHASE_CHANGE_H_
+#endif

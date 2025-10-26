@@ -1,10 +1,10 @@
 //! Constructor
 template <unsigned Tdim>
-mpm::THMMPMExplicitMHBS<Tdim>::THMMPMExplicitMHBS(
+mpm::THMCMPMExplicitHydrate<Tdim>::THMCMPMExplicitHydrate(
     const std::shared_ptr<IO>& io)
     : mpm::MPMBase<Tdim>(io) {
   //! Logger
-  console_ = spdlog::get("THMMPMExplicitMHBS");
+  console_ = spdlog::get("THMCMPMExplicitHydrate");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -17,7 +17,7 @@ mpm::THMMPMExplicitMHBS<Tdim>::THMMPMExplicitMHBS(
 
 //! Thermo-hydro-mechncial MPM Explicit solver
 template <unsigned Tdim>
-bool mpm::THMMPMExplicitMHBS<Tdim>::solve() {
+bool mpm::THMCMPMExplicitHydrate<Tdim>::solve() {
   bool status = true;
 
   console_->info("MPM analysis type {}", io_->analysis_type());
@@ -456,13 +456,13 @@ bool mpm::THMMPMExplicitMHBS<Tdim>::solve() {
 
 //! Thermo-hydro-mechanical MPM Explicit compute stress strain
 template <unsigned Tdim>
-void mpm::THMMPMExplicitMHBS<Tdim>::compute_stress_strain() {
+void mpm::THMCMPMExplicitHydrate<Tdim>::compute_stress_strain() {
 
 }
 
 //! MPM Explicit two-phase pressure smoothing
 template <unsigned Tdim>
-void mpm::THMMPMExplicitMHBS<Tdim>::pressure_smoothing(unsigned phase) {
+void mpm::THMCMPMExplicitHydrate<Tdim>::pressure_smoothing(unsigned phase) {
 
   const unsigned soil_skeleton = mpm::ParticlePhase::Solid;
   const unsigned pore_liquid = mpm::ParticlePhase::Liquid;
@@ -534,7 +534,7 @@ void mpm::THMMPMExplicitMHBS<Tdim>::pressure_smoothing(unsigned phase) {
 
 // Compute time step size
 template <unsigned Tdim>
-void mpm::THMMPMExplicitMHBS<Tdim>::compute_critical_timestep_size(double dt) {
+void mpm::THMCMPMExplicitHydrate<Tdim>::compute_critical_timestep_size(double dt) {
   const unsigned soil_skeleton = mpm::ParticlePhase::Solid;
   const unsigned pore_liquid = mpm::ParticlePhase::Liquid;
   const unsigned pore_gas = mpm::ParticlePhase::Gas;
@@ -601,7 +601,7 @@ void mpm::THMMPMExplicitMHBS<Tdim>::compute_critical_timestep_size(double dt) {
 
 // Pre process for MPM-DEM
 template <unsigned Tdim>
-bool mpm::THMMPMExplicitMHBS<Tdim>::pre_process() {
+bool mpm::THMCMPMExplicitHydrate<Tdim>::pre_process() {
   bool status = true;
   console_->info("MPM analysis type {}", io_->analysis_type());
 
@@ -689,7 +689,7 @@ bool mpm::THMMPMExplicitMHBS<Tdim>::pre_process() {
 // Main loop
 // (1) Compute deformation gradient for MPM-DEM
 template <unsigned Tdim>
-bool mpm::THMMPMExplicitMHBS<Tdim>::get_deformation_task() {
+bool mpm::THMCMPMExplicitHydrate<Tdim>::get_deformation_task() {
   bool status = true;
 
   // Main loop
@@ -887,7 +887,7 @@ bool mpm::THMMPMExplicitMHBS<Tdim>::get_deformation_task() {
 
 // (2) Get analysis information
 template <unsigned Tdim>
-void mpm::THMMPMExplicitMHBS<Tdim>::get_info(unsigned& dim, bool& resume,
+void mpm::THMCMPMExplicitHydrate<Tdim>::get_info(unsigned& dim, bool& resume,
                                                   unsigned& checkpoint_step) {
   dim = Tdim;
   if (analysis_.find("resume") != analysis_.end())
@@ -901,7 +901,7 @@ void mpm::THMMPMExplicitMHBS<Tdim>::get_info(unsigned& dim, bool& resume,
 
 // (3) Get steps, timesteps, and output steps
 template <unsigned Tdim>
-void mpm::THMMPMExplicitMHBS<Tdim>::get_status(double& dt, unsigned& step,
+void mpm::THMCMPMExplicitHydrate<Tdim>::get_status(double& dt, unsigned& step,
                                                     unsigned& nsteps,
                                                     unsigned& output_steps) {
   dt = dt_;
@@ -912,7 +912,7 @@ void mpm::THMMPMExplicitMHBS<Tdim>::get_status(double& dt, unsigned& step,
 
 // (4) Get deformation for DEM
 template <unsigned Tdim>
-bool mpm::THMMPMExplicitMHBS<Tdim>::send_deformation_task(
+bool mpm::THMCMPMExplicitHydrate<Tdim>::send_deformation_task(
     std::vector<unsigned>& id,
     std::vector<Eigen::MatrixXd>& displacement_gradients) {
   bool status = true;
@@ -921,7 +921,7 @@ bool mpm::THMMPMExplicitMHBS<Tdim>::send_deformation_task(
 }
 
 template <unsigned Tdim>
-bool mpm::THMMPMExplicitMHBS<Tdim>::send_saturation_task(
+bool mpm::THMCMPMExplicitHydrate<Tdim>::send_saturation_task(
     std::vector<unsigned>& id,
     std::vector<double>& hydrate_saturation) {
   bool status = true;
@@ -931,7 +931,7 @@ bool mpm::THMMPMExplicitMHBS<Tdim>::send_saturation_task(
 
 // Set particle stress
 template <unsigned Tdim>
-bool mpm::THMMPMExplicitMHBS<Tdim>::set_stress_task(
+bool mpm::THMCMPMExplicitHydrate<Tdim>::set_stress_task(
     const Eigen::MatrixXd& stresses, bool increment) {
   bool status = true;
   if (step_ < nsteps_) {
@@ -945,7 +945,7 @@ bool mpm::THMMPMExplicitMHBS<Tdim>::set_stress_task(
 
 // (5) Set particle porosity
 template <unsigned Tdim>
-bool mpm::THMMPMExplicitMHBS<Tdim>::set_porosity_task(
+bool mpm::THMCMPMExplicitHydrate<Tdim>::set_porosity_task(
     const Eigen::MatrixXd& porosities) {
   bool status = true;
   if (step_ < nsteps_) {
@@ -959,7 +959,7 @@ bool mpm::THMMPMExplicitMHBS<Tdim>::set_porosity_task(
 
 // (6) Set particle fabric
 template <unsigned Tdim>
-bool mpm::THMMPMExplicitMHBS<Tdim>::set_fabric_task(
+bool mpm::THMCMPMExplicitHydrate<Tdim>::set_fabric_task(
     std::string fabric_type, const Eigen::MatrixXd& fabrics) {
   bool status = true;
   if (step_ < nsteps_) {
@@ -973,7 +973,7 @@ bool mpm::THMMPMExplicitMHBS<Tdim>::set_fabric_task(
 
 // (7) Set particle rotation
 template <unsigned Tdim>
-bool mpm::THMMPMExplicitMHBS<Tdim>::set_rotation_task(
+bool mpm::THMCMPMExplicitHydrate<Tdim>::set_rotation_task(
     const Eigen::MatrixXd& rotations) {
   bool status = true;
   if (step_ < nsteps_) {
@@ -987,7 +987,7 @@ bool mpm::THMMPMExplicitMHBS<Tdim>::set_rotation_task(
 
 // (8) Update particle state, e.g., position, velocity
 template <unsigned Tdim>
-bool mpm::THMMPMExplicitMHBS<Tdim>::update_state_task() {
+bool mpm::THMCMPMExplicitHydrate<Tdim>::update_state_task() {
   // Two phases and its mixture (soil skeleton and pore liquid)
   // NOTE: Mixture nodal variables are stored at the same memory index as the
   // solid phase
@@ -1121,7 +1121,7 @@ bool mpm::THMMPMExplicitMHBS<Tdim>::update_state_task() {
     if (step_ == nsteps_) {
       auto solver_end = std::chrono::steady_clock::now();
       console_->info(
-          "Rank {}, THMMPMExplicitMHBS {} solver duration: {} ms", 0,
+          "Rank {}, THMCMPMExplicitHydrate {} solver duration: {} ms", 0,
           (this->stress_update_ == mpm::StressUpdate::USL ? "USL" : "USF"),
           std::chrono::duration_cast<std::chrono::milliseconds>(solver_end -
                                                                 solver_begin)

@@ -1,10 +1,10 @@
 //! Constructor
 template <unsigned Tdim>
-mpm::ThermoMPMExplicitThreePhase<Tdim>::ThermoMPMExplicitThreePhase(
+mpm::THMMPMExplicitThreePhase<Tdim>::THMMPMExplicitThreePhase(
     const std::shared_ptr<IO>& io)
     : mpm::MPMBase<Tdim>(io) {
   //! Logger
-  console_ = spdlog::get("ThermoMPMExplicitThreePhase");
+  console_ = spdlog::get("THMMPMExplicitThreePhase");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -17,7 +17,7 @@ mpm::ThermoMPMExplicitThreePhase<Tdim>::ThermoMPMExplicitThreePhase(
 
 //! Thermo-hydro-mechncial MPM Explicit solver
 template <unsigned Tdim>
-bool mpm::ThermoMPMExplicitThreePhase<Tdim>::solve() {
+bool mpm::THMMPMExplicitThreePhase<Tdim>::solve() {
   bool status = true;
 
   console_->info("MPM analysis type {}", io_->analysis_type());
@@ -393,7 +393,7 @@ bool mpm::ThermoMPMExplicitThreePhase<Tdim>::solve() {
 
 //! MPM Explicit two-phase pressure smoothing
 template <unsigned Tdim>
-void mpm::ThermoMPMExplicitThreePhase<Tdim>::pressure_smoothing(unsigned phase) {
+void mpm::THMMPMExplicitThreePhase<Tdim>::pressure_smoothing(unsigned phase) {
 
   const unsigned soil_skeleton = mpm::ParticlePhase::Solid;
   const unsigned pore_liquid = mpm::ParticlePhase::Liquid;
@@ -465,7 +465,7 @@ void mpm::ThermoMPMExplicitThreePhase<Tdim>::pressure_smoothing(unsigned phase) 
 
 // Compute time step size
 template <unsigned Tdim>
-void mpm::ThermoMPMExplicitThreePhase<Tdim>::compute_critical_timestep_size(double dt) {
+void mpm::THMMPMExplicitThreePhase<Tdim>::compute_critical_timestep_size(double dt) {
   const unsigned soil_skeleton = mpm::ParticlePhase::Solid;
   const unsigned pore_liquid = mpm::ParticlePhase::Liquid;
   const unsigned pore_gas = mpm::ParticlePhase::Gas;

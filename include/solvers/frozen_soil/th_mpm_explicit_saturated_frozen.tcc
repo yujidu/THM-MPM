@@ -1,15 +1,15 @@
 //! Constructor
 template <unsigned Tdim>
-mpm::ThermoMPMPhaseChange<Tdim>::ThermoMPMPhaseChange(
+mpm::THMPMExplicitSatFrozen<Tdim>::THMPMExplicitSatFrozen(
     const std::shared_ptr<IO>& io)
     : mpm::MPMBase<Tdim>(io) {
   //! Logger
-  console_ = spdlog::get("ThermoMPMPhaseChange");
+  console_ = spdlog::get("THMPMExplicitSatFrozen");
 }
 
 //! THM-MPM semi-implicit two phase with phase change solver
 template <unsigned Tdim>
-bool mpm::ThermoMPMPhaseChange<Tdim>::solve() {
+bool mpm::THMPMExplicitSatFrozen<Tdim>::solve() {
   bool status = true;
 
   console_->info("MPM analysis type {}", io_->analysis_type());
@@ -299,7 +299,7 @@ bool mpm::ThermoMPMPhaseChange<Tdim>::solve() {
 
 // Compute time step size
 template <unsigned Tdim>
-void mpm::ThermoMPMPhaseChange<Tdim>::compute_critical_timestep_size(double dt) {
+void mpm::THMPMExplicitSatFrozen<Tdim>::compute_critical_timestep_size(double dt) {
   const unsigned soil_skeleton = mpm::ParticlePhase::Solid;
   const unsigned pore_liquid = mpm::ParticlePhase::Liquid;
   const unsigned mixture = mpm::ParticlePhase::Mixture;

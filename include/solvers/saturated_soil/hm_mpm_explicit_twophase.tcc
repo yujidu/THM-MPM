@@ -1,10 +1,10 @@
 //! Constructor
 template <unsigned Tdim>
-mpm::MPMExplicitTwoPhase<Tdim>::MPMExplicitTwoPhase(
+mpm::HMMPMExplicitTwoPhase<Tdim>::HMMPMExplicitTwoPhase(
     const std::shared_ptr<IO>& io)
     : mpm::MPMBase<Tdim>(io) {
   //! Logger
-  console_ = spdlog::get("MPMExplicitTwoPhase");
+  console_ = spdlog::get("HMMPMExplicitTwoPhase");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -17,7 +17,7 @@ mpm::MPMExplicitTwoPhase<Tdim>::MPMExplicitTwoPhase(
 
 //! MPM Explicit solver
 template <unsigned Tdim>
-bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
+bool mpm::HMMPMExplicitTwoPhase<Tdim>::solve() {
   bool status = true;
 
   console_->info("MPM analysis type {}", io_->analysis_type());
@@ -414,7 +414,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 
 //! Thermo-mechancial MPM explicit solver for MPM-DEM
 template <unsigned Tdim>
-bool mpm::MPMExplicitTwoPhase<Tdim>::pre_process() {
+bool mpm::HMMPMExplicitTwoPhase<Tdim>::pre_process() {
   bool status = true;
   console_->info("MPM analysis type {}", io_->analysis_type());
 
@@ -492,7 +492,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::pre_process() {
 
 // Main loop
 template <unsigned Tdim>
-bool mpm::MPMExplicitTwoPhase<Tdim>::get_deformation_task() {
+bool mpm::HMMPMExplicitTwoPhase<Tdim>::get_deformation_task() {
   bool status = true;
   if (step_ < nsteps_) {
 
@@ -604,7 +604,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::get_deformation_task() {
 }
 
 template <unsigned Tdim>
-void mpm::MPMExplicitTwoPhase<Tdim>::get_info(unsigned& dim, bool& resume,
+void mpm::HMMPMExplicitTwoPhase<Tdim>::get_info(unsigned& dim, bool& resume,
                                       unsigned& checkpoint_step) {
   dim = Tdim;
   if (analysis_.find("resume") != analysis_.end())
@@ -617,7 +617,7 @@ void mpm::MPMExplicitTwoPhase<Tdim>::get_info(unsigned& dim, bool& resume,
 }
 
 template <unsigned Tdim>
-void mpm::MPMExplicitTwoPhase<Tdim>::get_status(double& dt, unsigned& step,
+void mpm::HMMPMExplicitTwoPhase<Tdim>::get_status(double& dt, unsigned& step,
                                         unsigned& nsteps,
                                         unsigned& output_steps) {
   dt = dt_;
@@ -627,7 +627,7 @@ void mpm::MPMExplicitTwoPhase<Tdim>::get_status(double& dt, unsigned& step,
 }
 
 template <unsigned Tdim>
-bool mpm::MPMExplicitTwoPhase<Tdim>::send_deformation_task(
+bool mpm::HMMPMExplicitTwoPhase<Tdim>::send_deformation_task(
     std::vector<unsigned>& id,
     std::vector<Eigen::MatrixXd>& displacement_gradients) {
   bool status = true;
@@ -636,7 +636,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::send_deformation_task(
 }
 
 template <unsigned Tdim>
-bool mpm::MPMExplicitTwoPhase<Tdim>::set_stress_task(const Eigen::MatrixXd& stresses,
+bool mpm::HMMPMExplicitTwoPhase<Tdim>::set_stress_task(const Eigen::MatrixXd& stresses,
                                              bool increment) {
   bool status = true;
   if (step_ < nsteps_) {
@@ -649,7 +649,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::set_stress_task(const Eigen::MatrixXd& stre
 }
 
 template <unsigned Tdim>
-bool mpm::MPMExplicitTwoPhase<Tdim>::set_porosity_task(
+bool mpm::HMMPMExplicitTwoPhase<Tdim>::set_porosity_task(
     const Eigen::MatrixXd& porosities) {
   bool status = true;
   if (step_ < nsteps_) {
@@ -662,7 +662,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::set_porosity_task(
 }
 
 template <unsigned Tdim>
-bool mpm::MPMExplicitTwoPhase<Tdim>::set_fabric_task(std::string fabric_type,
+bool mpm::HMMPMExplicitTwoPhase<Tdim>::set_fabric_task(std::string fabric_type,
                                              const Eigen::MatrixXd& fabrics) {
   bool status = true;
   if (step_ < nsteps_) {
@@ -675,7 +675,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::set_fabric_task(std::string fabric_type,
 }
 
 template <unsigned Tdim>
-bool mpm::MPMExplicitTwoPhase<Tdim>::set_rotation_task(
+bool mpm::HMMPMExplicitTwoPhase<Tdim>::set_rotation_task(
     const Eigen::MatrixXd& rotations) {
   bool status = true;
   if (step_ < nsteps_) {
@@ -688,7 +688,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::set_rotation_task(
 }
 
 template <unsigned Tdim>
-bool mpm::MPMExplicitTwoPhase<Tdim>::update_state_task() {
+bool mpm::HMMPMExplicitTwoPhase<Tdim>::update_state_task() {
   bool status = true;
   if (step_ < nsteps_) {
 
@@ -835,7 +835,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::update_state_task() {
 // FIXME: This is a copy of pressure_smoothing in semiimplicit two-phase
 //! MPM Explicit two-phase pressure smoothing
 template <unsigned Tdim>
-void mpm::MPMExplicitTwoPhase<Tdim>::pressure_smoothing(unsigned phase) {
+void mpm::HMMPMExplicitTwoPhase<Tdim>::pressure_smoothing(unsigned phase) {
 
   if (phase == mpm::ParticlePhase::Solid) {
     // Assign pressure to nodes

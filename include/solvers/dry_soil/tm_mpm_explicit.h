@@ -1,5 +1,5 @@
-#ifndef MPM_HYDRO_MPM_EXPLICIT_H_
-#define MPM_HYDRO_MPM_EXPLICIT_H_
+#ifndef MPM_THERMO_MPM_EXPLICIT_H_
+#define MPM_THERMO_MPM_EXPLICIT_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
@@ -9,15 +9,15 @@
 #include <Eigen/Dense>
 namespace mpm {
 
-//! HydroMPMExplicit class
+//! TMMPMExplicit class
 //! \brief A class that implements the fully explicit one phase thermal-mechanical mpm
 //! \details A single-phase thermal-mechanical explicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class HydroMPMExplicit : public MPMBase<Tdim> {
+class TMMPMExplicit : public MPMBase<Tdim> {
  public:
   //! Default constructor
-  HydroMPMExplicit(const std::shared_ptr<IO>& io);
+  TMMPMExplicit(const std::shared_ptr<IO>& io);
 
   //! Domain decomposition
   void mpi_domain_decompose();
@@ -32,10 +32,53 @@ class HydroMPMExplicit : public MPMBase<Tdim> {
   //! Compute stress strain
   //! \param[in] phase Phase to smooth pressure
   void compute_stress_strain(unsigned phase);
+  
+  //! Apply temperature constraints
+  void apply_nodal_temperature_constraints(unsigned phase);
 
   // Compute time step size
   void compute_critical_timestep_size(double dt);  
 
+  //! Pre process for MPM-DEM
+  bool pre_process() override;
+
+  //! Get deformation gradient for MPM-DEM
+  bool get_deformation_task() override;
+
+  //! Get analysis information
+  void get_info(unsigned& dim, bool& resume,
+                unsigned& checkpoint_step) override;
+
+  //! get step, time
+  void get_status(double& dt, unsigned& step, unsigned& nsteps,
+                  unsigned& output_steps) override;
+
+  //! send deformation task
+  bool send_deformation_task(
+      std::vector<unsigned>& id,
+      std::vector<Eigen::MatrixXd>& displacement_gradients) override;
+
+  //! send temperature task
+  bool send_temperature_task(
+      std::vector<unsigned>& id,
+      std::vector<double>& particle_temperature) override;    
+
+  //! Set particle stress
+  bool set_stress_task(const Eigen::MatrixXd& stresses,
+                       bool increment) override;
+
+  //! Set particle porosity
+  bool set_porosity_task(const Eigen::MatrixXd& porosities) override;
+
+  // Set particle fabric
+  bool set_fabric_task(std::string fabric_type,
+                       const Eigen::MatrixXd& fabrics) override;
+
+  // Set particle rotation
+  bool set_rotation_task(const Eigen::MatrixXd& rotations) override;
+
+  // Update particle state eg position, velocity
+  bool update_state_task() override;
 
  protected:
   // Generate a unique id for the analysis
@@ -97,11 +140,6 @@ class HydroMPMExplicit : public MPMBase<Tdim> {
   //! Solver begin time
   std::chrono::time_point<std::chrono::steady_clock> solver_begin;
 
-  // Free surface detection
-  std::string free_surface_particle_{"detect"};
-  //! Volume tolerance for free surface
-  double volume_tolerance_{0.25};
-
   // Time step matrix
   using mpm::MPMBase<Tdim>::dt_matrix_;
   // Steps
@@ -112,10 +150,24 @@ class HydroMPMExplicit : public MPMBase<Tdim> {
   double current_time_{0};
   // Output number
   int No_output{0};
+  // Free surface detection
+  std::string free_surface_particle_{"detect"};
+  //! Volume tolerance for free surface
+  double volume_tolerance_{0.25}; 
+  //! Virtual flux
+  bool virtual_flux_{false};
+  // Flux type
+  std::string flux_type_{"convective"};
+  // Heat transfer coeff
+  double heat_transfer_coeff_{0};
+  // Ambient temperature
+  double ambient_temperature_{0};
+  // COnductive flux
+  double flux_{0};
 
-};  // HydroMPMExplicit class
+};  // TMMPMExplicit class
 }  // namespace mpm
 
-#include "hydro_mpm_explicit.tcc"
+#include "tm_mpm_explicit.tcc"
 
-#endif  // MPM_HYDRO_MPM_EXPLICIT_H_
+#endif  // MPM_THERMO_MPM_EXPLICIT_H_

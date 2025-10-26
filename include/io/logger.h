@@ -37,28 +37,28 @@ struct Logger {
   static const std::shared_ptr<spdlog::logger> mpm_explicit_logger;
 
   // Create a logger for Thermo-mechanical MPM Explicit
-  static const std::shared_ptr<spdlog::logger> thermo_mpm_explicit_logger;
+  static const std::shared_ptr<spdlog::logger> tm_mpm_explicit_logger;
 
   // Create a logger for Thermo-mechanical MPM Explicit
   static const std::shared_ptr<spdlog::logger> thermo_mpm_implicit_logger;  
 
   // Create a logger for MPM Explicit Two Phase
-  static const std::shared_ptr<spdlog::logger> mpm_explicit_two_phase_logger;
+  static const std::shared_ptr<spdlog::logger> hm_mpm_explicit_two_phase_logger;
 
   // Create a logger for Thermal MPM Explicit Two Phase
-  static const std::shared_ptr<spdlog::logger> thermo_mpm_explicit_two_phase_logger;
+  static const std::shared_ptr<spdlog::logger> thm_mpm_explicit_two_phase_logger;
 
   // Create a logger for Thermal MPM Explicit Three Phase
-  static const std::shared_ptr<spdlog::logger> thermo_mpm_explicit_three_phase_logger;
+  static const std::shared_ptr<spdlog::logger> thm_mpm_explicit_three_phase_logger;
 
   // Create a logger for THM-MPM Explicit for saturated frozen soil
   static const std::shared_ptr<spdlog::logger> thm_mpm_explicit_sat_frozen_logger;
 
   // Create a logger for MPM Semi-implicit Two Phase
-  static const std::shared_ptr<spdlog::logger> mpm_semi_implicit_two_phase_logger;
+  static const std::shared_ptr<spdlog::logger> hm_mpm_semi_implicit_two_phase_logger;
 
   // Create a logger for thermal MPM Semi-implicit Two Phase
-  static const std::shared_ptr<spdlog::logger> thermo_mpm_semi_implicit_two_phase_logger;
+  static const std::shared_ptr<spdlog::logger> thm_mpm_semi_implicit_two_phase_logger;
 
   // Create a logger for THM-MPM Semi-implicit for saturated frozen soil
   static const std::shared_ptr<spdlog::logger> thm_mpm_semi_implicit_sat_frozen_logger;
@@ -67,16 +67,13 @@ struct Logger {
   static const std::shared_ptr<spdlog::logger> thm_mpm_semi_implicit_unsat_frozen_logger;
 
   // Create a logger for THM-MPM Semi-implicit for saturated frozen soil
-  static const std::shared_ptr<spdlog::logger> thermo_mpm_phase_change_logger;
+  static const std::shared_ptr<spdlog::logger> th_mpm_explicit_sat_frozen_logger;
 
   // Create a logger for THM-MPM Semi-implicit for saturated frozen soil
-  static const std::shared_ptr<spdlog::logger> thm_mpm_explicit_MHBS_logger;
+  static const std::shared_ptr<spdlog::logger> thmc_mpm_explicit_hydrate_logger;
 
   // Create a logger for 
-  static const std::shared_ptr<spdlog::logger> hydro_mpm_explicit_logger; 
-
-  // Create a logger for 
-  static const std::shared_ptr<spdlog::logger> hydro_mpm_explicit_MHBS_logger;   
+  static const std::shared_ptr<spdlog::logger> thc_mpm_explicit_hydrate_logger;   
 
   // Create a logger for MPM Explicit USF
   static const std::shared_ptr<spdlog::logger> mpm_explicit_usf_logger;
