@@ -16,7 +16,8 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
     // Softening status
     softening_ = material_properties.at("softening").template get<bool>();  
     // thermal Softening status
-    softening_type_ = material_properties.at("softening_type").template get<std::string>();      
+    softening_type_ = 
+        material_properties.at("softening_type").template get<std::string>();      
     // Peak friction, dilation and cohesion
     phi_peak_ =
         material_properties.at("friction").template get<double>() * M_PI / 180.;
@@ -41,10 +42,13 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
     // Tensile strength
     tension_cutoff_ =
         material_properties.at("tension_cutoff").template get<double>();
-    // shape parameters
-    eta_ = material_properties.at("eta").template get<double>();
-    eta_T_ = material_properties.at("eta_T").template get<double>();     
-    eta_p_ = material_properties.at("eta_p").template get<double>(); 
+    // Strain softening shape parameter
+    eta_s_ = material_properties.at("eta_s").template get<double>();
+    // Thermal softening shape parameter
+    eta_t_ = material_properties.at("eta_t").template get<double>();
+    // Damage status
+    damage_ = material_properties.at("damage").template get<bool>();  
+    // Damage parameter
     A_s_ = material_properties.at("A_s").template get<double>();
     // Properties
     properties_ = material_properties;
@@ -52,7 +56,6 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
     bulk_modulus_ = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
     // Shear modulus
     shear_modulus_ = youngs_modulus_ / (2.0 * (1 + poisson_ratio_));
-
 
     // Set elastic tensor
     this->compute_elastic_tensor();
@@ -406,75 +409,50 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     }
     else if (softening_type_ == "exp" && pdstrain > 0) {
       // Compute dPhi/dPstrain
-      dphi_dpstrain = eta_ * (phi_residual_ - phi_peak_) * 
-                      std::exp(-eta_ * pdstrain);
+      dphi_dpstrain = eta_s_ * (phi_residual_ - phi_peak_) * 
+                      std::exp(-eta_s_ * pdstrain);
       // Compute dc/dPstrain
-      dc_dpstrain = eta_ * (cohesion_residual_ - cohesion_peak_) * 
-                    std::exp(-eta_ * pdstrain);
+      dc_dpstrain = eta_s_ * (cohesion_residual_ - cohesion_peak_) * 
+                    std::exp(-eta_s_ * pdstrain);
     } 
     else if (softening_type_ == "thermal" && pdstrain > 0) {
       double temperature = ptr->temperature();
       double temperature_0 = 0;      
       // Compute dPhi/dPstrain
-      dphi_dpstrain = eta_ * (phi_residual_ - phi_peak_) * 
-            std::exp(-eta_ * pdstrain - eta_T_ * (temperature - temperature_0));
+      dphi_dpstrain = eta_s_ * (phi_residual_ - phi_peak_) * 
+            std::exp(-eta_s_ * pdstrain - eta_t_ * (temperature - temperature_0));
       // Compute dc/dPstrain
-      dc_dpstrain = eta_ * (cohesion_residual_ - cohesion_peak_) * 
-            std::exp(-eta_ * pdstrain - eta_T_ * (temperature - temperature_0));
-    }      
-    else if (softening_type_ == "pressure" && pdstrain > 0) {
-      double pressure = ptr->pore_pressure();
-      double pressure_0 = 0;     
-      // Compute dPhi/dPstrain
-      dphi_dpstrain = eta_ * (phi_residual_ - phi_peak_) * 
-                std::exp(-eta_ * pdstrain - eta_p_ * (pressure - pressure_0));
-      // Compute dc/dPstrain
-      dc_dpstrain = eta_ * (cohesion_residual_ - cohesion_peak_) * 
-                std::exp(-eta_ * pdstrain - eta_p_ * (pressure - pressure_0));
-    } 
+      dc_dpstrain = eta_s_ * (cohesion_residual_ - cohesion_peak_) * 
+            std::exp(-eta_s_ * pdstrain - eta_t_ * (temperature - temperature_0));
+    }
     else if (softening_type_ == "exp hydrate" && pdstrain > 0) {
         double Sh = ptr->hydrate_saturation();
         double Sh_peak = ptr->ini_hydrate_saturation();
         // double phi_peak_t = phi_residual_ + (phi_peak_ - phi_residual_) * 
-        //                         std::exp(eta_T_ * (Sh - Sh_peak));
+        //                         std::exp(eta_t_ * (Sh - Sh_peak));
         double phi_peak_t = phi_peak_;
         double psi_peak_t = psi_residual_ + (psi_peak_ - psi_residual_) * 
-                                std::exp(eta_T_ * (Sh - Sh_peak));       
+                                std::exp(eta_t_ * (Sh - Sh_peak));       
         double cohesion_peak_t = cohesion_residual_ + (cohesion_peak_ - cohesion_residual_) * 
-                                std::exp(eta_T_ * (Sh - Sh_peak));
+                                std::exp(eta_t_ * (Sh - Sh_peak));
         // Compute dPhi/dPstrain
-        dphi_dpstrain = eta_ * (phi_residual_ - phi_peak_t) * std::exp(-eta_ * pdstrain);
+        dphi_dpstrain = eta_s_ * (phi_residual_ - phi_peak_t) * std::exp(-eta_s_ * pdstrain);
         // Compute dc/dPstrain
-        dc_dpstrain = eta_ * (cohesion_residual_ - cohesion_peak_t) * std::exp(-eta_ * pdstrain );
+        dc_dpstrain = eta_s_ * (cohesion_residual_ - cohesion_peak_t) * std::exp(-eta_s_ * pdstrain );
     }
     else if (softening_type_ == "exp frozen soil" && pdstrain > 0) {
         double Sc = 1. - ptr->liquid_saturation();
         double Sc_peak = 1.0;
         double phi_peak_t = phi_peak_;
         double psi_peak_t = psi_residual_ + (psi_peak_ - psi_residual_) * 
-                                std::exp(eta_T_ * (Sc - Sc_peak));       
+                                std::exp(eta_t_ * (Sc - Sc_peak));       
         double cohesion_peak_t = cohesion_residual_ + (cohesion_peak_ - cohesion_residual_) * 
-                                std::exp(eta_T_ * (Sc - Sc_peak));
+                                std::exp(eta_t_ * (Sc - Sc_peak));
         // Compute dPhi/dPstrain
-        dphi_dpstrain = eta_ * (phi_residual_ - phi_peak_t) * std::exp(-eta_ * pdstrain);
+        dphi_dpstrain = eta_s_ * (phi_residual_ - phi_peak_t) * std::exp(-eta_s_ * pdstrain);
         // Compute dc/dPstrain
-        dc_dpstrain = eta_ * (cohesion_residual_ - cohesion_peak_t) * std::exp(-eta_ * pdstrain );
-    } 
-    else if (softening_type_ == "linear hydrate" && pdstrain > 0) {
-        double Sh = ptr->hydrate_saturation();
-        double Sh_peak = ptr->ini_hydrate_saturation();
-        double phi_peak_t = phi_residual_ +
-                            ((phi_peak_ - phi_residual_) * Sh / Sh_peak);
-        double cohesion_peak_t = cohesion_residual_ +
-                            ((cohesion_peak_ - cohesion_residual_) * Sh / Sh_peak);
-        // Compute dPhi/dPstrain
-        dphi_dpstrain = eta_ * (phi_residual_ - phi_peak_t) * 
-                        std::exp(-eta_ * pdstrain);
-        // Compute dc/dPstrain
-        dc_dpstrain = eta_ * (cohesion_residual_ - cohesion_peak_t) * 
-                      std::exp(-eta_ * pdstrain);
-    } 
-
+        dc_dpstrain = eta_s_ * (cohesion_residual_ - cohesion_peak_t) * std::exp(-eta_s_ * pdstrain );
+    }
 
     // Compute dF/dPstrain
     double df_dphi =
@@ -514,47 +492,38 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     }     
     else if (softening_type_ == "exp" && pdstrain > 0) {
       (*state_vars)["phi"] = phi_residual_ + (phi_peak_ - phi_residual_) * 
-                              std::exp(-eta_ * pdstrain);
+                              std::exp(-eta_s_ * pdstrain);
       (*state_vars)["cohesion"] = cohesion_residual_ + (cohesion_peak_ - cohesion_residual_) *
-                              std::exp(-eta_ * pdstrain);
+                              std::exp(-eta_s_ * pdstrain);
       // (*state_vars)["psi"] = psi_residual_ + (psi_peak_ - psi_residual_) *
-      //                         std::exp(-eta_ * pdstrain);
-      (*state_vars)["psi"] = psi_peak_ * std::exp(-eta_ * pdstrain);                                          
+      //                         std::exp(-eta_s_ * pdstrain);
+      (*state_vars)["psi"] = psi_peak_ * std::exp(-eta_s_ * pdstrain);                                          
     }    
     else if (softening_type_ == "thermal" && pdstrain > 0) { 
       (*state_vars)["psi"] = psi_residual_; 
       double temperature = ptr->temperature();
       double temperature_0 = 0;
       (*state_vars)["phi"] = phi_residual_ + (phi_peak_ - phi_residual_) * 
-                              std::exp(-eta_ * pdstrain - eta_T_ * (temperature - temperature_0));
+                              std::exp(-eta_s_ * pdstrain - eta_t_ * (temperature - temperature_0));
       (*state_vars)["cohesion"] = cohesion_residual_ + (cohesion_peak_ - cohesion_residual_) *
-                              std::exp(-eta_ * pdstrain - eta_T_ * (temperature - temperature_0));          
+                              std::exp(-eta_s_ * pdstrain - eta_t_ * (temperature - temperature_0));          
     }      
-    else if (softening_type_ == "pressure" && pdstrain > 0) {
-      (*state_vars)["psi"] = psi_residual_;          
-        double pressure = ptr->pore_pressure();
-        double pressure_0 = 0;
-        (*state_vars)["phi"] = phi_residual_ + (phi_peak_ - phi_residual_) * 
-                                std::exp(-eta_ * pdstrain - eta_p_ * (pressure - pressure_0));
-        (*state_vars)["cohesion"] = cohesion_residual_ + (cohesion_peak_ - cohesion_residual_) *
-                                std::exp(-eta_ * pdstrain - eta_p_ * (pressure - pressure_0));
-    }
     else if (softening_type_ == "exp hydrate" && pdstrain > 0) {
       (*state_vars)["psi"] = psi_residual_;          
         double Sh = ptr->hydrate_saturation();
         double Sh_peak = ptr->ini_hydrate_saturation();
         // double phi_peak_t = phi_residual_ + (phi_peak_ - phi_residual_) * 
-        //                         std::exp(eta_T_ * (Sh - Sh_peak));
+        //                         std::exp(eta_t_ * (Sh - Sh_peak));
         double phi_peak_t = phi_peak_;
         double psi_peak_t = psi_residual_ + (psi_peak_ - psi_residual_) * 
-                                std::exp(eta_T_ * (Sh - Sh_peak));
+                                std::exp(eta_t_ * (Sh - Sh_peak));
         double cohesion_peak_t = cohesion_residual_ + (cohesion_peak_ - cohesion_residual_) * 
-                                std::exp(eta_T_ * (Sh - Sh_peak));
+                                std::exp(eta_t_ * (Sh - Sh_peak));
         (*state_vars)["phi"] = phi_residual_ + (phi_peak_t - phi_residual_) * 
-                                std::exp(-eta_ * pdstrain);
-        (*state_vars)["psi"] = psi_peak_t * std::exp(-eta_ * pdstrain);
+                                std::exp(-eta_s_ * pdstrain);
+        (*state_vars)["psi"] = psi_peak_t * std::exp(-eta_s_ * pdstrain);
         (*state_vars)["cohesion"] = cohesion_residual_ + (cohesion_peak_t - cohesion_residual_) *
-                                std::exp(-eta_ * pdstrain);
+                                std::exp(-eta_s_ * pdstrain);
     }
     else if (softening_type_ == "exp frozen soil" && pdstrain > 0) {
       (*state_vars)["psi"] = psi_residual_;          
@@ -562,32 +531,15 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
         double Sc_peak = 1.0;
         double phi_peak_t = phi_peak_;
         double psi_peak_t = psi_residual_ + (psi_peak_ - psi_residual_) * 
-                                std::exp(eta_T_ * (Sc - Sc_peak));
+                                std::exp(eta_t_ * (Sc - Sc_peak));
         double cohesion_peak_t = cohesion_residual_ + (cohesion_peak_ - cohesion_residual_) * 
-                                std::exp(eta_T_ * (Sc - Sc_peak));
+                                std::exp(eta_t_ * (Sc - Sc_peak));
         (*state_vars)["phi"] = phi_residual_ + (phi_peak_t - phi_residual_) * 
-                                std::exp(-eta_ * pdstrain);
-        (*state_vars)["psi"] = psi_peak_t * std::exp(-eta_ * pdstrain);
+                                std::exp(-eta_s_ * pdstrain);
+        (*state_vars)["psi"] = psi_peak_t * std::exp(-eta_s_ * pdstrain);
         (*state_vars)["cohesion"] = cohesion_residual_ + (cohesion_peak_t - cohesion_residual_) *
-                                std::exp(-eta_ * pdstrain);
-    }
-    else if (softening_type_ == "linear hydrate" && pdstrain > 0) {
-      (*state_vars)["psi"] = psi_residual_;          
-        double Sh = ptr->hydrate_saturation();
-        double Sh_peak = ptr->ini_hydrate_saturation();
-        double phi_peak_t = phi_residual_ +
-                            ((phi_peak_ - phi_residual_) * Sh / Sh_peak);
-        double cohesion_peak_t = cohesion_residual_ +
-                            ((cohesion_peak_ - cohesion_residual_) * Sh / Sh_peak);
-
-      (*state_vars)["phi"] = phi_residual_ +
-                            ((phi_peak_t - phi_residual_) * (pdstrain - pdstrain_residual_) /
-                            (pdstrain_peak_ - pdstrain_residual_));
-      (*state_vars)["cohesion"] = cohesion_residual_ + 
-                                ((cohesion_peak_t - cohesion_residual_) *
-                                (pdstrain - pdstrain_residual_) /
-                                (pdstrain_peak_ - pdstrain_residual_));
-    }    
+                                std::exp(-eta_s_ * pdstrain);
+    }  
     else {
       (*state_vars)["phi"] = phi_residual_;
       (*state_vars)["psi"] = psi_residual_;
@@ -597,10 +549,13 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   phi_ = (*state_vars)["phi"];
   cohesion_ = (*state_vars)["cohesion"];
 
-  double omega = std::exp(-A_s_ * pdstrain) * 0.9 + 0.1;
-  Vector6d stress_new;
-  stress_new = stress / omega;
-  // de_ = de_ / omega;
+  double omega = 1.;
+  Vector6d stress_new = stress;
+  if (damage_) {
+    omega = std::exp(-A_s_ * pdstrain) * 0.9 + 0.1;
+    stress_new = stress / omega;
+  }
+
   //-------------------------------------------------------------------------
   // Elastic-predictor stage: compute the trial stress
   Vector6d trial_stress = stress_new + (this->de_ * dstrain);
@@ -716,18 +671,9 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   // // (*state_vars).at("omega") = omega_new;
 
   // updated_stress *= omega_new;
-    // std::cout << "  pid= " << ptr->id() << "\n";
-
-  // if (ptr->id() == 246) {
-  //   std::cout << "  pid= " << ptr->id() << "\n";
-  //   std::cout << "  pdstrain= " << (*state_vars).at("pdstrain") << "\n";
-
-  // }
 
   if (yield_type == mpm::mohrcoulomb::FailureState::Shear) yield_type_ = 1;
   if (yield_type == mpm::mohrcoulomb::FailureState::Tensile) yield_type_ = 2;
-
-  // updated_stress[5] = (*state_vars).at("pdstrain");
 
   return updated_stress;
 }

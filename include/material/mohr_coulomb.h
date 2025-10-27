@@ -153,17 +153,19 @@ class MohrCoulomb : public Material<Tdim> {
   // double cohesion_min_{std::numeric_limits<double>::max()};  
   // //! Reference temperaturrrrrrrrrrrrre
   // double temperature_ref_{std::numeric_limits<double>::max()};
-  //! Eta
-  double eta_{std::numeric_limits<double>::max()};
-  double eta_T_{std::numeric_limits<double>::max()};
-  double eta_p_{std::numeric_limits<double>::max()};
-  double eta_f_{std::numeric_limits<double>::max()};      
+  //! Eta s: strain softening
+  double eta_s_{std::numeric_limits<double>::max()};
+  //! Eta t: thermal softening
+  double eta_t_{std::numeric_limits<double>::max()};
   // yield type
   double yield_type_{0};
   // cohesion
   double cohesion_;
   // phi
-  double phi_;  
+  double phi_;
+  //! Damage status
+  bool damage_{false};  
+  //! Damage paramwters
   double A_s_;
 };  // MohrCoulomb class
 }  // namespace mpm

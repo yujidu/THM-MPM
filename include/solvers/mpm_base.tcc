@@ -70,17 +70,6 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
       pic_ = 0.;
     }
 
-    // Temperature update
-    try {
-      pic_t_ = analysis_["PIC_T"].template get<double>();
-    } catch (std::exception& exception) {
-      console_->warn(
-          "{} #{}: PIC_T  parameter is not specified, using default "
-          "as FLIP PIC_T=0",
-          __FILE__, __LINE__, exception.what());
-      pic_t_ = 0.;
-    }
-
     // Damping
     try {
       if (analysis_.find("damping") != analysis_.end()) {

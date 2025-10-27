@@ -289,7 +289,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
     });
 
-    mesh_->compute_nonlocal_particle_neighbours();
+    // mesh_->compute_nonlocal_particle_neighbours();
 
     // Spawn a task for particles
     task_group.run([&] {
@@ -330,7 +330,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 #endif
 
     // Apply particle velocity constraints
-    mesh_->apply_moving_rigid_boundary(current_time_, dt_);
+    // mesh_->apply_moving_rigid_boundary(current_time_, dt_);
 
     // Compute nodal velocity
     mesh_->iterate_over_nodes_predicate(

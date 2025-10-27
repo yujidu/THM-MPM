@@ -3051,35 +3051,35 @@ void mpm::Mesh<Tdim>::compute_particle_nonlocal_variable(double char_size, doubl
 
     (*pitr)->assign_stress((*pitr)->stress() * omega_new);
 
-    if (p_id == 1682) {
-      std::cout << "=== Particle " << p_id << " Detailed Info ===" << std::endl;
-      std::cout << "Cell: " << c_id << std::endl;
-      std::cout << "Nonlocal neighbours: " << neighbour_particles.size() << std::endl;
-      std::cout << "Volume sum: " << volume_sum << std::endl;
-      std::cout << "Variable sum: " << damage_sum << std::endl;
-      std::cout << "Local pdstrain: " << (*pitr)->state_variable("pdstrain") << std::endl;
-      std::cout << "Computed damage variable: " << scaled_damage << std::endl;
-      std::cout << "Stored damage variable: " << (*pitr)->state_variable("damage") << std::endl;
+    // if (p_id == 1682) {
+    //   std::cout << "=== Particle " << p_id << " Detailed Info ===" << std::endl;
+    //   std::cout << "Cell: " << c_id << std::endl;
+    //   std::cout << "Nonlocal neighbours: " << neighbour_particles.size() << std::endl;
+    //   std::cout << "Volume sum: " << volume_sum << std::endl;
+    //   std::cout << "Variable sum: " << damage_sum << std::endl;
+    //   std::cout << "Local pdstrain: " << (*pitr)->state_variable("pdstrain") << std::endl;
+    //   std::cout << "Computed damage variable: " << scaled_damage << std::endl;
+    //   std::cout << "Stored damage variable: " << (*pitr)->state_variable("damage") << std::endl;
 
-      // 输出一些邻居信息用于调试
-      int count_within_range = 0;
-      for (auto neighbour_id : neighbour_particles) {
-        auto neighbour_particle = map_particles_[neighbour_id];
-        if (neighbour_particle != nullptr) {
-          const auto neighbour_coords = neighbour_particle->coordinates();
-          double distance = (p_coordinates - neighbour_coords).norm();
-          if (distance <= (char_size * 2.0)) {
-            count_within_range++;
-            std::cout << "  Neighbour " << neighbour_id << ": distance=" << distance 
-                      << ", pdstrain=" << neighbour_particle->state_variable("pdstrain") 
-                      << ", volume=" << neighbour_particle->volume() << std::endl;
-          }
-        }
-      }
-      std::cout << "Neighbours within char_size: " << count_within_range << std::endl;
-      std::cout << "=================================" << std::endl;
+    //   // 输出一些邻居信息用于调试
+    //   int count_within_range = 0;
+    //   for (auto neighbour_id : neighbour_particles) {
+    //     auto neighbour_particle = map_particles_[neighbour_id];
+    //     if (neighbour_particle != nullptr) {
+    //       const auto neighbour_coords = neighbour_particle->coordinates();
+    //       double distance = (p_coordinates - neighbour_coords).norm();
+    //       if (distance <= (char_size * 2.0)) {
+    //         count_within_range++;
+    //         std::cout << "  Neighbour " << neighbour_id << ": distance=" << distance 
+    //                   << ", pdstrain=" << neighbour_particle->state_variable("pdstrain") 
+    //                   << ", volume=" << neighbour_particle->volume() << std::endl;
+    //       }
+    //     }
+    //   }
+    //   std::cout << "Neighbours within char_size: " << count_within_range << std::endl;
+    //   std::cout << "=================================" << std::endl;
 
       
-    }
+    // }
   }
 }

@@ -199,7 +199,9 @@ public:
   double hydrate_saturation() const override { return hydrate_saturation_; }  
 
   // Return liquid_saturation
-  double ini_hydrate_saturation() const override { return ini_hydrate_saturation_; }    
+  double ini_hydrate_saturation() const override { 
+    return ini_hydrate_saturation_; 
+  }    
 
 protected:
 

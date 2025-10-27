@@ -8,7 +8,8 @@ mpm::HydrateParticle<Tdim>::HydrateParticle(Index id, const VectorDim& coord)
     // Set material pointer to null
     liquid_material_ = nullptr;
     // Logger
-    std::string logger = "HydrateParticle" + std::to_string(Tdim) + "d::" + std::to_string(id);
+    std::string logger = "HydrateParticle" + std::to_string(Tdim) + "d::" + 
+                          std::to_string(id);
     console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
@@ -164,7 +165,7 @@ void mpm::HydrateParticle<Tdim>::initialise_liquid_phase() {
       {"hydrate_saturations",    [&]() {return this->hydrate_saturation_;}},
       {"PIC_hydrate_saturations",[&]() {return this->PIC_hydrate_saturation_;}},
       {"PIC_porosities",         [&]() {return this->PIC_porosity_;}},
-      {"PIC_volumes",             [&]() {return this->PIC_volume_;}},
+      {"PIC_volumes",            [&]() {return this->PIC_volume_;}},
       {"hydrate_fractions",      [&]() {return this->hydrate_fraction_;}},
       {"hydrate_densities",      [&]() {return this->hydrate_density_;}},
       {"hydrate_sources",        [&]() {return this->hydrate_source_;}},
@@ -442,15 +443,6 @@ bool mpm::HydrateParticle<Tdim>::assign_initial_properties() {
     // this->ini_liquid_pressure_ = this->liquid_pressure_;
     // this->ini_pore_pressure_ = this->pore_pressure_;
     // this->ini_suction_pressure_ = this->suction_pressure_;
-
-    // if (id_ == 1000) {
-    //   std::cout << this->effective_saturation_ << "\n"
-    //             << this->suction_pressure_ << "\n"
-    //             << this->gas_pressure_ << "\n"
-    //             << this->liquid_pressure_ << "\n"
-    //             << this->pore_pressure_ << "\n";
-    // }
-
   } catch (std::exception& exception) {
     console_->error("{} #{}: Function: {}, {}\n", __FILE__, __LINE__, __func__, 
                     exception.what());
@@ -561,10 +553,10 @@ void mpm::HydrateParticle<2>::map_internal_force() {
 
       // GAS PHASE
       for (unsigned i = 0; i < nodes_.size(); ++i) {
-        // gas_force[0] = dn_dx_(i, 0) * (gas_pressure_ - ini_gas_pressure_);
-        // gas_force[1] = dn_dx_(i, 1) * (gas_pressure_ - ini_gas_pressure_);
-        gas_force[0] = dn_dx_centroid_(i, 0) * (gas_pressure_ - ini_gas_pressure_);
-        gas_force[1] = dn_dx_centroid_(i, 1) * (gas_pressure_ - ini_gas_pressure_);
+        gas_force[0] = dn_dx_(i, 0) * (gas_pressure_ - ini_gas_pressure_);
+        gas_force[1] = dn_dx_(i, 1) * (gas_pressure_ - ini_gas_pressure_);
+        // gas_force[0] = dn_dx_centroid_(i, 0) * (gas_pressure_ - ini_gas_pressure_);
+        // gas_force[1] = dn_dx_centroid_(i, 1) * (gas_pressure_ - ini_gas_pressure_);
         // In case of 2D axisymmetric
         if (is_axisymmetric_) {
           gas_force[0] += shapefn_[i] / this->coordinates_(0) * gas_pressure_;
@@ -576,16 +568,16 @@ void mpm::HydrateParticle<2>::map_internal_force() {
 
       // MIXTURE
       for (unsigned i = 0; i < nodes_.size(); ++i) {
-        // mixture_force[0] = dn_dx_(i, 0) * total_stress_[0] + 
-        //                   dn_dx_(i, 1) * total_stress_[3];
-        // mixture_force[1] = dn_dx_(i, 1) * total_stress_[1] + 
-        //                   dn_dx_(i, 0) * total_stress_[3];
-        mixture_force[0] = (dn_dx_(i, 0) + (dn_dx_centroid_(i, 0) - dn_dx_(i, 0)) / 2.) * total_stress_[0] +
-                  (dn_dx_centroid_(i, 0) - dn_dx_(i, 0)) / 2. * total_stress_[1] +
-                  dn_dx_(i, 1) * total_stress_[3];
-        mixture_force[1] = (dn_dx_centroid_(i, 1) - dn_dx_(i, 1)) / 2. * total_stress_[0] +
-                  (dn_dx_(i, 1) + (dn_dx_centroid_(i, 1) - dn_dx_(i, 1)) / 2.) * total_stress_[1] +
-                  dn_dx_(i, 0) * total_stress_[3];
+        mixture_force[0] = dn_dx_(i, 0) * total_stress_[0] + 
+                          dn_dx_(i, 1) * total_stress_[3];
+        mixture_force[1] = dn_dx_(i, 1) * total_stress_[1] + 
+                          dn_dx_(i, 0) * total_stress_[3];
+        // mixture_force[0] = (dn_dx_(i, 0) + (dn_dx_centroid_(i, 0) - dn_dx_(i, 0)) / 2.) * total_stress_[0] +
+        //           (dn_dx_centroid_(i, 0) - dn_dx_(i, 0)) / 2. * total_stress_[1] +
+        //           dn_dx_(i, 1) * total_stress_[3];
+        // mixture_force[1] = (dn_dx_centroid_(i, 1) - dn_dx_(i, 1)) / 2. * total_stress_[0] +
+        //           (dn_dx_(i, 1) + (dn_dx_centroid_(i, 1) - dn_dx_(i, 1)) / 2.) * total_stress_[1] +
+        //           dn_dx_(i, 0) * total_stress_[3];
 
         if (is_axisymmetric_) 
           mixture_force[0] += shapefn_[i] / this->coordinates_(0) * total_stress_[2];

@@ -3,7 +3,6 @@
 #include "material/cam_clay.h"
 #include "material/linear_elastic.h"
 #include "material/mohr_coulomb.h"
-#include "material/MC_frozen_soil.h"
 #include "material/newtonian.h"
 #include "material/norsand.h"
 #include "material/rigid.h"
@@ -38,14 +37,6 @@ static Register<mpm::Material<2>, mpm::MohrCoulomb<2>, unsigned, const Json&>
 // MohrCoulomb 3D
 static Register<mpm::Material<3>, mpm::MohrCoulomb<3>, unsigned, const Json&>
     mohr_coulomb_3d("MohrCoulomb3D");
-
-// MohrCoulomb 2D
-static Register<mpm::Material<2>, mpm::MohrCoulomb_FrozenSoil<2>, unsigned, const Json&>
-    frozen_mohr_coulomb_2d("FrozenMohrCoulomb2D");
-
-// MohrCoulomb 3D
-static Register<mpm::Material<3>, mpm::MohrCoulomb_FrozenSoil<3>, unsigned, const Json&>
-    frozen_mohr_coulomb_3d("FrozenMohrCoulomb3D");
 
 // Newtonian 2D
 static Register<mpm::Material<2>, mpm::Newtonian<2>, unsigned, const Json&>
